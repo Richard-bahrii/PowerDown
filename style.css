@@ -150,17 +150,19 @@ body.shutdown-active .tab-panel {
   display: none;
 }
 
-label {
-  flex: 1;
+.field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 13px;
-  color: var(--text-muted);
+  margin-bottom: 18px;
 }
 
-.tab-panel label {
-  margin-bottom: 18px;
+.field label {
+  /* Only the text should be clickable to reach the input, not the full row. */
+  width: fit-content;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 input {
