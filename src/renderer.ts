@@ -111,8 +111,17 @@ const LOCALES: Record<Lang, UiLocale> = {
 };
 
 const DEFAULT_LANG: Lang = 'en';
-let currentLang: Lang = (localStorage.getItem('lang') as Lang) || DEFAULT_LANG;
-if (!LOCALES[currentLang]) currentLang = DEFAULT_LANG;
+
+// First run picks the OS language when it's one we support, otherwise English.
+// An explicit choice is saved and always wins on later launches.
+function detectDefaultLang(): Lang {
+  const sys = navigator.language.slice(0, 2).toLowerCase();
+  return sys in LOCALES ? (sys as Lang) : DEFAULT_LANG;
+}
+
+const savedLang = localStorage.getItem('lang');
+let currentLang: Lang =
+  savedLang && savedLang in LOCALES ? (savedLang as Lang) : detectDefaultLang();
 
 function t<K extends keyof UiLocale>(key: K): UiLocale[K] {
   return LOCALES[currentLang][key];
