@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>PowerDown</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="top-bar">
+    <h1 data-i18n="appTitle">Turn off the computer</h1>
+    <select id="language-select">
+      <option value="en">English</option>
+      <option value="uk">Українська</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="timer" data-i18n="tabTimer">In...</button>
+    <button class="tab-btn" data-tab="schedule" data-i18n="tabSchedule">Scheduled</button>
+  </div>
+
+  <section id="tab-timer" class="tab-panel active">
+    <div class="row">
+      <label>
+        <span data-i18n="hoursLabel">Hours</span>
+        <input type="number" id="timer-hours" min="0" max="23" value="0" />
+      </label>
+      <label>
+        <span data-i18n="minutesLabel">Minutes</span>
+        <input type="number" id="timer-minutes" min="0" max="59" value="30" />
+      </label>
+    </div>
+    <div class="quick-buttons">
+      <button data-minutes="15" data-quick-index="0">15 min</button>
+      <button data-minutes="30" data-quick-index="1">30 min</button>
+      <button data-minutes="60" data-quick-index="2">1 h</button>
+      <button data-minutes="120" data-quick-index="3">2 h</button>
+    </div>
+    <button id="start-timer" class="primary" data-i18n="startBtn">Schedule shutdown</button>
+  </section>
+
+  <section id="tab-schedule" class="tab-panel">
+    <div class="row">
+      <label>
+        <span data-i18n="dateLabel">Date</span>
+        <input type="date" id="schedule-date" />
+      </label>
+      <label>
+        <span data-i18n="timeLabel">Time</span>
+        <input type="time" id="schedule-time" />
+      </label>
+    </div>
+    <button id="start-schedule" class="primary" data-i18n="startBtn">Schedule shutdown</button>
+  </section>
+
+  <div id="status" class="status hidden">
+    <p data-i18n="statusWillShutdown">The computer will shut down:</p>
+    <p id="status-target"></p>
+    <p id="status-countdown" class="countdown"></p>
+    <button id="cancel-btn" class="danger" data-i18n="cancelBtn">Cancel</button>
+  </div>
+
+  <p class="hint" data-i18n="hint">Closing the window does not cancel the scheduled shutdown — the app will minimize to the tray.</p>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
