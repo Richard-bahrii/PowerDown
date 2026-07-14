@@ -240,10 +240,14 @@ function localeUses12h(tag: string): boolean {
 // taller than the window) would overflow and show a scrollbar. Grow the window
 // to fit the open picker, then shrink back to the content on close.
 function fitWindowToOpenPicker(instance: FlatpickrInstance): void {
-  // Leave a clear gap below the open calendar so it isn't flush against the
-  // window edge (which left a tiny scrollbar).
+  // Compute the needed height from stable quantities — the input's fixed layout
+  // position plus the calendar's own height — rather than the calendar's live
+  // positioned bottom, which flatpickr derives from the current window size and
+  // so varied between the first and later opens. Plus a gap so the calendar
+  // isn't flush against the window edge (which left a tiny scrollbar).
   const bottomGap = 28;
-  const needed = Math.ceil(instance.calendarContainer.getBoundingClientRect().bottom) + bottomGap;
+  const inputBottom = Math.ceil(instance.input.getBoundingClientRect().bottom);
+  const needed = inputBottom + instance.calendarContainer.offsetHeight + bottomGap;
   if (window.api && window.api.resizeWindow) {
     window.api.resizeWindow(Math.max(document.body.offsetHeight, needed));
   }

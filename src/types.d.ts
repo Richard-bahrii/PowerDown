@@ -29,6 +29,7 @@ interface Window {
 interface FlatpickrInstance {
   selectedDates: Date[];
   calendarContainer: HTMLElement;
+  input: HTMLInputElement;
   setDate(date: Date | string, triggerChange?: boolean): void;
   destroy(): void;
 }
