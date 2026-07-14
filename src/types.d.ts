@@ -28,9 +28,12 @@ interface Window {
 // Minimal typing for the vendored flatpickr global (loaded via a <script> tag).
 interface FlatpickrInstance {
   selectedDates: Date[];
+  calendarContainer: HTMLElement;
   setDate(date: Date | string, triggerChange?: boolean): void;
   destroy(): void;
 }
+
+type FlatpickrHook = (selectedDates: Date[], dateStr: string, instance: FlatpickrInstance) => void;
 
 interface FlatpickrOptions {
   enableTime?: boolean;
@@ -41,6 +44,9 @@ interface FlatpickrOptions {
   minDate?: string | Date;
   defaultDate?: string | Date;
   locale?: string;
+  position?: string;
+  onOpen?: FlatpickrHook;
+  onClose?: FlatpickrHook;
 }
 
 declare const flatpickr: (selector: string, options: FlatpickrOptions) => FlatpickrInstance;

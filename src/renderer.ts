@@ -236,6 +236,16 @@ function localeUses12h(tag: string): boolean {
   return new Intl.DateTimeFormat(tag, { hour: 'numeric' }).resolvedOptions().hour12 === true;
 }
 
+// The window is sized tightly to its content, so an open calendar (which is
+// taller than the window) would overflow and show a scrollbar. Grow the window
+// to fit the open picker, then shrink back to the content on close.
+function fitWindowToOpenPicker(instance: FlatpickrInstance): void {
+  const needed = Math.ceil(instance.calendarContainer.getBoundingClientRect().bottom) + 12;
+  if (window.api && window.api.resizeWindow) {
+    window.api.resizeWindow(Math.max(document.body.offsetHeight, needed));
+  }
+}
+
 function initPickers(): void {
   const timerDefault: Date | string =
     timerPicker && timerPicker.selectedDates[0] ? timerPicker.selectedDates[0] : '00:30';
@@ -252,6 +262,9 @@ function initPickers(): void {
   // is a duration (no AM/PM), so it always stays 24-hour.
   const use12h = localeUses12h(LOCALES[currentLang].tag);
 
+  const onOpen: FlatpickrHook = (_dates, _str, instance) => fitWindowToOpenPicker(instance);
+  const onClose: FlatpickrHook = () => resizeToContent();
+
   timerPicker = flatpickr('#timer-duration', {
     enableTime: true,
     noCalendar: true,
@@ -260,6 +273,9 @@ function initPickers(): void {
     minuteIncrement: 1,
     defaultDate: timerDefault,
     locale: fpLocale(),
+    position: 'below',
+    onOpen,
+    onClose,
   });
 
   schedulePicker = flatpickr('#schedule-datetime', {
@@ -269,6 +285,9 @@ function initPickers(): void {
     minDate: 'today',
     defaultDate: scheduleDefault,
     locale: fpLocale(),
+    position: 'below',
+    onOpen,
+    onClose,
   });
 }
 
