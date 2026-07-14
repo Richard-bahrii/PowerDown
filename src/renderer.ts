@@ -1,4 +1,23 @@
-const LOCALES = {
+interface UiLocale {
+  tag: string;
+  appTitle: string;
+  tabTimer: string;
+  tabSchedule: string;
+  quickButtons: string[];
+  startBtn: string;
+  statusWillShutdown: string;
+  cancelBtn: string;
+  hint: string;
+  alertTimeZero: string;
+  alertPickDateTime: string;
+  alertFuture: string;
+  shuttingDown: string;
+  autoLaunch: string;
+  durationLabel: string;
+  dateTimeLabel: string;
+}
+
+const LOCALES: Record<Lang, UiLocale> = {
   en: {
     tag: 'en-US',
     appTitle: 'Turn off the computer',
@@ -91,21 +110,21 @@ const LOCALES = {
   },
 };
 
-const DEFAULT_LANG = 'en';
-let currentLang = localStorage.getItem('lang') || DEFAULT_LANG;
+const DEFAULT_LANG: Lang = 'en';
+let currentLang: Lang = (localStorage.getItem('lang') as Lang) || DEFAULT_LANG;
 if (!LOCALES[currentLang]) currentLang = DEFAULT_LANG;
 
-function t(key) {
+function t<K extends keyof UiLocale>(key: K): UiLocale[K] {
   return LOCALES[currentLang][key];
 }
 
-function applyTranslations() {
+function applyTranslations(): void {
   document.documentElement.lang = currentLang;
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
-    el.textContent = t(el.dataset.i18n);
+  document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n as keyof UiLocale) as string;
   });
-  document.querySelectorAll('[data-quick-index]').forEach((el) => {
-    el.textContent = t('quickButtons')[parseInt(el.dataset.quickIndex, 10)];
+  document.querySelectorAll<HTMLElement>('[data-quick-index]').forEach((el) => {
+    el.textContent = t('quickButtons')[Number(el.dataset.quickIndex)];
   });
   if (currentTarget !== null) {
     statusTarget.textContent = formatDateTime(currentTarget);
@@ -115,43 +134,42 @@ function applyTranslations() {
 // Match the window to the currently visible content, so switching tabs or
 // entering the countdown view doesn't leave empty space. flatpickr popups are
 // absolutely positioned and don't affect body.offsetHeight, so it stays stable.
-function resizeToContent() {
+function resizeToContent(): void {
   if (window.api && window.api.resizeWindow) {
     window.api.resizeWindow(document.body.offsetHeight);
   }
 }
 
-function setLanguage(lang) {
-  if (!LOCALES[lang]) lang = DEFAULT_LANG;
-  currentLang = lang;
-  localStorage.setItem('lang', lang);
+function setLanguage(lang: string): void {
+  currentLang = lang in LOCALES ? (lang as Lang) : DEFAULT_LANG;
+  localStorage.setItem('lang', currentLang);
   applyTranslations();
   initPickers();
   resizeToContent();
-  window.api.setLocale(lang);
+  window.api.setLocale(currentLang);
 }
 
 // --- Custom language dropdown (native <select> can't render flag images) ---
-const langSelect = document.getElementById('lang-select');
-const langTrigger = document.getElementById('lang-trigger');
-const langMenu = document.getElementById('lang-menu');
-const langCurrentFlag = document.getElementById('lang-current-flag');
-const langCurrentName = document.getElementById('lang-current-name');
-const langOptions = Array.from(langMenu.querySelectorAll('[data-lang]'));
+const langSelect = document.getElementById('lang-select')!;
+const langTrigger = document.getElementById('lang-trigger')!;
+const langMenu = document.getElementById('lang-menu')!;
+const langCurrentFlag = document.getElementById('lang-current-flag') as HTMLImageElement;
+const langCurrentName = document.getElementById('lang-current-name')!;
+const langOptions = Array.from(langMenu.querySelectorAll<HTMLElement>('[data-lang]'));
 
-function updateLangTrigger(lang) {
+function updateLangTrigger(lang: string): void {
   const option = langOptions.find((li) => li.dataset.lang === lang) || langOptions[0];
-  langCurrentFlag.src = option.querySelector('.flag').src;
-  langCurrentName.textContent = option.querySelector('span').textContent;
+  langCurrentFlag.src = (option.querySelector('.flag') as HTMLImageElement).src;
+  langCurrentName.textContent = option.querySelector('span')!.textContent;
   langOptions.forEach((li) => li.classList.toggle('selected', li === option));
 }
 
-function openLangMenu() {
+function openLangMenu(): void {
   langSelect.classList.add('open');
   langTrigger.setAttribute('aria-expanded', 'true');
 }
 
-function closeLangMenu() {
+function closeLangMenu(): void {
   langSelect.classList.remove('open');
   langTrigger.setAttribute('aria-expanded', 'false');
 }
@@ -162,29 +180,30 @@ langTrigger.addEventListener('click', () => {
 
 langOptions.forEach((li) => {
   li.addEventListener('click', () => {
-    setLanguage(li.dataset.lang);
-    updateLangTrigger(li.dataset.lang);
+    const lang = li.dataset.lang!;
+    setLanguage(lang);
+    updateLangTrigger(lang);
     closeLangMenu();
   });
 });
 
 document.addEventListener('click', (event) => {
-  if (!langSelect.contains(event.target)) closeLangMenu();
+  if (!langSelect.contains(event.target as Node)) closeLangMenu();
 });
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeLangMenu();
 });
 
-const tabButtons = document.querySelectorAll('.tab-btn');
-const tabPanels = document.querySelectorAll('.tab-panel');
+const tabButtons = document.querySelectorAll<HTMLElement>('.tab-btn');
+const tabPanels = document.querySelectorAll<HTMLElement>('.tab-panel');
 
 tabButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     tabButtons.forEach((b) => b.classList.remove('active'));
     tabPanels.forEach((p) => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab)!.classList.add('active');
     resizeToContent();
   });
 });
@@ -193,19 +212,19 @@ tabButtons.forEach((btn) => {
 // Timer tab: a calendar-less 24h time field acts as an H:MM duration, which
 // inherently constrains input to 0–23 h and 0–59 min. Scheduled tab: a full
 // date+time field that can't be set earlier than today.
-let timerPicker = null;
-let schedulePicker = null;
+let timerPicker: FlatpickrInstance | null = null;
+let schedulePicker: FlatpickrInstance | null = null;
 
-function fpLocale() {
+function fpLocale(): string {
   // uk/es/fr/de are registered on flatpickr.l10ns by the vendored l10n scripts;
   // 'default' is flatpickr's built-in English.
   return currentLang === 'en' ? 'default' : currentLang;
 }
 
-function initPickers() {
-  const timerDefault =
+function initPickers(): void {
+  const timerDefault: Date | string =
     timerPicker && timerPicker.selectedDates[0] ? timerPicker.selectedDates[0] : '00:30';
-  const scheduleDefault =
+  const scheduleDefault: Date | string =
     schedulePicker && schedulePicker.selectedDates[0]
       ? schedulePicker.selectedDates[0]
       : new Date(Date.now() + 60 * 60 * 1000);
@@ -233,26 +252,26 @@ function initPickers() {
   });
 }
 
-document.querySelectorAll('.quick-buttons button').forEach((btn) => {
+document.querySelectorAll<HTMLElement>('.quick-buttons button').forEach((btn) => {
   btn.addEventListener('click', () => {
-    const minutes = parseInt(btn.dataset.minutes, 10);
+    const minutes = Number(btn.dataset.minutes);
     const h = String(Math.floor(minutes / 60)).padStart(2, '0');
     const m = String(minutes % 60).padStart(2, '0');
     if (timerPicker) timerPicker.setDate(`${h}:${m}`, false);
   });
 });
 
-const statusBox = document.getElementById('status');
-const statusTarget = document.getElementById('status-target');
-const statusCountdown = document.getElementById('status-countdown');
-let countdownIntervalId = null;
-let currentTarget = null;
+const statusBox = document.getElementById('status')!;
+const statusTarget = document.getElementById('status-target')!;
+const statusCountdown = document.getElementById('status-countdown')!;
+let countdownIntervalId: ReturnType<typeof setInterval> | null = null;
+let currentTarget: number | null = null;
 
-function formatDateTime(ts) {
+function formatDateTime(ts: number): string {
   return new Date(ts).toLocaleString(t('tag'));
 }
 
-function formatDuration(ms) {
+function formatDuration(ms: number): string {
   if (ms < 0) ms = 0;
   const totalSeconds = Math.floor(ms / 1000);
   const h = Math.floor(totalSeconds / 3600);
@@ -261,7 +280,7 @@ function formatDuration(ms) {
   return [h, m, s].map((n) => String(n).padStart(2, '0')).join(':');
 }
 
-function startCountdownDisplay(targetTimestamp) {
+function startCountdownDisplay(targetTimestamp: number): void {
   currentTarget = targetTimestamp;
   document.body.classList.add('shutdown-active');
   statusBox.classList.remove('hidden');
@@ -270,9 +289,9 @@ function startCountdownDisplay(targetTimestamp) {
 
   if (countdownIntervalId) clearInterval(countdownIntervalId);
   const tick = () => {
-    const remaining = currentTarget - Date.now();
+    const remaining = targetTimestamp - Date.now();
     statusCountdown.textContent = formatDuration(remaining);
-    if (remaining <= 0) {
+    if (remaining <= 0 && countdownIntervalId) {
       clearInterval(countdownIntervalId);
       countdownIntervalId = null;
       statusCountdown.textContent = t('shuttingDown');
@@ -282,7 +301,7 @@ function startCountdownDisplay(targetTimestamp) {
   countdownIntervalId = setInterval(tick, 1000);
 }
 
-function stopCountdownDisplay() {
+function stopCountdownDisplay(): void {
   if (countdownIntervalId) {
     clearInterval(countdownIntervalId);
     countdownIntervalId = null;
@@ -293,8 +312,8 @@ function stopCountdownDisplay() {
   resizeToContent();
 }
 
-document.getElementById('start-timer').addEventListener('click', () => {
-  const picked = timerPicker.selectedDates[0];
+document.getElementById('start-timer')!.addEventListener('click', () => {
+  const picked = timerPicker?.selectedDates[0];
   const hours = picked ? picked.getHours() : 0;
   const minutes = picked ? picked.getMinutes() : 0;
   const totalMs = (hours * 3600 + minutes * 60) * 1000;
@@ -307,8 +326,8 @@ document.getElementById('start-timer').addEventListener('click', () => {
   startCountdownDisplay(target);
 });
 
-document.getElementById('start-schedule').addEventListener('click', () => {
-  const picked = schedulePicker.selectedDates[0];
+document.getElementById('start-schedule')!.addEventListener('click', () => {
+  const picked = schedulePicker?.selectedDates[0];
   if (!picked) {
     alert(t('alertPickDateTime'));
     return;
@@ -322,23 +341,22 @@ document.getElementById('start-schedule').addEventListener('click', () => {
   startCountdownDisplay(target);
 });
 
-document.getElementById('cancel-btn').addEventListener('click', () => {
+document.getElementById('cancel-btn')!.addEventListener('click', () => {
   window.api.cancelShutdown();
   stopCountdownDisplay();
 });
 
 window.api.onStatusChanged((status) => {
-  if (status.active) {
+  if (status.active && status.targetTime !== null) {
     startCountdownDisplay(status.targetTime);
   } else {
     stopCountdownDisplay();
   }
 });
 
-const autoLaunchCheckbox = document.getElementById('auto-launch');
+const autoLaunchCheckbox = document.getElementById('auto-launch') as HTMLInputElement;
 autoLaunchCheckbox.addEventListener('change', async () => {
-  const applied = await window.api.setAutoLaunch(autoLaunchCheckbox.checked);
-  autoLaunchCheckbox.checked = applied;
+  autoLaunchCheckbox.checked = await window.api.setAutoLaunch(autoLaunchCheckbox.checked);
 });
 
 (async () => {
@@ -349,7 +367,7 @@ autoLaunchCheckbox.addEventListener('change', async () => {
   window.api.setLocale(currentLang);
 
   const status = await window.api.getStatus();
-  if (status.active) {
+  if (status.active && status.targetTime !== null) {
     startCountdownDisplay(status.targetTime);
   }
 

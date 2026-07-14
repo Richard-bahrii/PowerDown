@@ -1,14 +1,37 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain, dialog, nativeImage } = require('electron');
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
+import {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  ipcMain,
+  dialog,
+  nativeImage,
+  IpcMainEvent,
+  MenuItemConstructorOptions,
+} from 'electron';
+import { exec } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
 
 app.setName('PowerDown');
 
-const ICON_PATH = path.join(__dirname, 'assets', 'icon.png');
+// __dirname is the compiled dist/ directory, so assets/index.html live one level up.
+const ICON_PATH = path.join(__dirname, '..', 'assets', 'icon.png');
+const INDEX_HTML = path.join(__dirname, '..', 'index.html');
 
-const LOCALES = {
+interface TrayLocale {
+  tag: string;
+  trayShow: string;
+  trayScheduledAt: (time: string) => string;
+  trayNotScheduled: string;
+  trayCancel: string;
+  trayQuit: string;
+  errorTitle: string;
+  errorBody: string;
+}
+
+const LOCALES: Record<Lang, TrayLocale> = {
   en: {
     tag: 'en-US',
     trayShow: 'Show window',
@@ -61,17 +84,18 @@ const LOCALES = {
   },
 };
 
-let currentLocale = 'en';
-function loc() {
-  return LOCALES[currentLocale] || LOCALES.en;
+let currentLocale: Lang = 'en';
+function loc(): TrayLocale {
+  return LOCALES[currentLocale];
 }
 
-let mainWindow = null;
-let tray = null;
-let checkIntervalId = null;
-let targetTime = null; // ms since epoch, or null when nothing scheduled
+let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+let checkIntervalId: ReturnType<typeof setInterval> | null = null;
+let targetTime: number | null = null; // ms since epoch, or null when nothing scheduled
+let isQuitting = false; // set for a real quit so the tray "hide on close" handler lets it through
 
-function buildShutdownCommand() {
+function buildShutdownCommand(): string {
   switch (process.platform) {
     case 'win32':
       return 'shutdown /s /f /t 0';
@@ -83,22 +107,19 @@ function buildShutdownCommand() {
   }
 }
 
-function executeShutdown() {
+function executeShutdown(): void {
   exec(buildShutdownCommand(), (error) => {
     if (error) {
       console.error('Failed to shut down the computer:', error);
       if (mainWindow) {
-        dialog.showErrorBox(
-          loc().errorTitle,
-          loc().errorBody + error.message
-        );
+        dialog.showErrorBox(loc().errorTitle, loc().errorBody + error.message);
       }
     }
   });
   clearSchedule();
 }
 
-function clearSchedule() {
+function clearSchedule(): void {
   if (checkIntervalId) {
     clearInterval(checkIntervalId);
     checkIntervalId = null;
@@ -107,7 +128,7 @@ function clearSchedule() {
   updateTrayMenu();
 }
 
-function scheduleShutdown(timestamp) {
+function scheduleShutdown(timestamp: number): void {
   clearSchedule();
   targetTime = timestamp;
   checkIntervalId = setInterval(() => {
@@ -118,7 +139,7 @@ function scheduleShutdown(timestamp) {
   updateTrayMenu();
 }
 
-function getStatus() {
+function getStatus(): ShutdownStatus {
   return { active: targetTime !== null, targetTime };
 }
 
@@ -127,14 +148,14 @@ function getStatus() {
 // .desktop file, since Electron's login-item API doesn't cover it.
 const linuxAutostartFile = path.join(os.homedir(), '.config', 'autostart', 'powerdown.desktop');
 
-function getAutoLaunch() {
+function getAutoLaunch(): boolean {
   if (process.platform === 'linux') {
     return fs.existsSync(linuxAutostartFile);
   }
   return app.getLoginItemSettings().openAtLogin;
 }
 
-function setAutoLaunch(enabled) {
+function setAutoLaunch(enabled: boolean): void {
   if (process.platform === 'linux') {
     if (enabled) {
       const execCmd = app.isPackaged
@@ -159,14 +180,14 @@ function setAutoLaunch(enabled) {
   app.setLoginItemSettings({ openAtLogin: enabled });
 }
 
-function createWindow() {
+function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 420,
     height: 470,
     useContentSize: true,
     resizable: false,
     backgroundColor: '#1b1b1e',
-    icon: path.join(__dirname, 'assets', 'icon.png'),
+    icon: ICON_PATH,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -175,18 +196,18 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(INDEX_HTML);
 
   mainWindow.on('close', (event) => {
-    if (tray && !app.isQuitting) {
+    if (tray && !isQuitting) {
       event.preventDefault();
-      mainWindow.hide();
+      mainWindow?.hide();
     }
   });
 }
 
-function createTray() {
-  const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'));
+function createTray(): void {
+  const icon = nativeImage.createFromPath(ICON_PATH);
   const trayIcon = icon.isEmpty() ? icon : icon.resize({ width: 16, height: 16 });
   try {
     tray = new Tray(trayIcon);
@@ -203,15 +224,18 @@ function createTray() {
   }
 }
 
-function updateTrayMenu() {
+function updateTrayMenu(): void {
   if (!tray) return;
   const active = targetTime !== null;
   const l = loc();
-  const menu = Menu.buildFromTemplate([
+  const template: MenuItemConstructorOptions[] = [
     { label: l.trayShow, click: () => mainWindow && mainWindow.show() },
     { type: 'separator' },
     {
-      label: active ? l.trayScheduledAt(new Date(targetTime).toLocaleString(l.tag)) : l.trayNotScheduled,
+      label:
+        active && targetTime !== null
+          ? l.trayScheduledAt(new Date(targetTime).toLocaleString(l.tag))
+          : l.trayNotScheduled,
       enabled: false,
     },
     {
@@ -226,12 +250,12 @@ function updateTrayMenu() {
     {
       label: l.trayQuit,
       click: () => {
-        app.isQuitting = true;
+        isQuitting = true;
         app.quit();
       },
     },
-  ]);
-  tray.setContextMenu(menu);
+  ];
+  tray.setContextMenu(Menu.buildFromTemplate(template));
 }
 
 app.whenReady().then(() => {
@@ -248,7 +272,7 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     } else {
-      mainWindow.show();
+      mainWindow?.show();
     }
   });
 });
@@ -260,12 +284,12 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  app.isQuitting = true;
+  isQuitting = true;
 });
 
 ipcMain.handle('get-status', () => getStatus());
 
-ipcMain.on('schedule-shutdown', (_event, timestamp) => {
+ipcMain.on('schedule-shutdown', (_event: IpcMainEvent, timestamp: number) => {
   scheduleShutdown(timestamp);
 });
 
@@ -275,14 +299,14 @@ ipcMain.on('cancel-shutdown', () => {
 
 ipcMain.handle('get-platform', () => process.platform);
 
-ipcMain.on('set-locale', (_event, lang) => {
-  if (LOCALES[lang]) {
-    currentLocale = lang;
+ipcMain.on('set-locale', (_event: IpcMainEvent, lang: string) => {
+  if (lang in LOCALES) {
+    currentLocale = lang as Lang;
     updateTrayMenu();
   }
 });
 
-ipcMain.on('resize-window', (_event, height) => {
+ipcMain.on('resize-window', (_event: IpcMainEvent, height: number) => {
   if (!mainWindow) return;
   const [width] = mainWindow.getContentSize();
   const clamped = Math.max(200, Math.min(1200, Math.round(height)));
@@ -291,7 +315,7 @@ ipcMain.on('resize-window', (_event, height) => {
 
 ipcMain.handle('get-auto-launch', () => getAutoLaunch());
 
-ipcMain.handle('set-auto-launch', (_event, enabled) => {
+ipcMain.handle('set-auto-launch', (_event, enabled: boolean) => {
   setAutoLaunch(enabled);
   return getAutoLaunch();
 });

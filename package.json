@@ -2,30 +2,32 @@
   "name": "power-down",
   "version": "1.0.0",
   "description": "A small Electron app for shutting down the computer on a timer or a schedule",
-  "main": "main.js",
+  "main": "dist/main.js",
   "author": "",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "electron .",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "npm run build && electron .",
     "icon": "node assets/generate-icon.cjs",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac",
-    "dist:linux": "electron-builder --linux"
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.9.3"
   },
   "build": {
     "appId": "com.local.powerdown",
     "productName": "PowerDown",
     "files": [
-      "main.js",
-      "preload.js",
+      "dist/**/*",
       "index.html",
-      "renderer.js",
       "style.css",
       "assets/icon.png",
       "assets/vendor/**/*"

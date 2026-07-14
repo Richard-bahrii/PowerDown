@@ -1,6 +1,6 @@
-const { contextBridge, ipcRenderer } = require('electron');
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-contextBridge.exposeInMainWorld('api', {
+const api: PowerDownApi = {
   scheduleShutdown: (timestamp) => ipcRenderer.send('schedule-shutdown', timestamp),
   cancelShutdown: () => ipcRenderer.send('cancel-shutdown'),
   getStatus: () => ipcRenderer.invoke('get-status'),
@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld('api', {
   setAutoLaunch: (enabled) => ipcRenderer.invoke('set-auto-launch', enabled),
   resizeWindow: (height) => ipcRenderer.send('resize-window', height),
   onStatusChanged: (callback) => {
-    ipcRenderer.on('status-changed', (_event, status) => callback(status));
+    ipcRenderer.on('status-changed', (_event: IpcRendererEvent, status: ShutdownStatus) =>
+      callback(status)
+    );
   },
-});
+};
+
+contextBridge.exposeInMainWorld('api', api);
