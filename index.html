@@ -32,10 +32,10 @@
   </div>
 
   <section id="tab-timer" class="tab-panel active">
-    <label>
-      <span data-i18n="durationLabel">Time until shutdown (h : mm)</span>
+    <div class="field">
+      <label for="timer-duration" data-i18n="durationLabel">Time until shutdown (h : mm)</label>
       <input type="text" id="timer-duration" placeholder="00:30" />
-    </label>
+    </div>
     <div class="quick-buttons">
       <button data-minutes="15" data-quick-index="0">15 min</button>
       <button data-minutes="30" data-quick-index="1">30 min</button>
@@ -46,10 +46,10 @@
   </section>
 
   <section id="tab-schedule" class="tab-panel">
-    <label>
-      <span data-i18n="dateTimeLabel">Date and time</span>
+    <div class="field">
+      <label for="schedule-datetime" data-i18n="dateTimeLabel">Date and time</label>
       <input type="text" id="schedule-datetime" placeholder="2026-07-14 23:30" />
-    </label>
+    </div>
     <button id="start-schedule" class="primary" data-i18n="startBtn">Schedule shutdown</button>
   </section>
 
