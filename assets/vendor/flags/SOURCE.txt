@@ -1,0 +1,1 @@
+MIT-licensed flags vendored from flag-icons (https://github.com/lipis/flag-icons). Only the languages this app supports are included.
