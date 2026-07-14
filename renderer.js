@@ -17,6 +17,7 @@ const LOCALES = {
     alertPickDateTime: 'Please select a date and time.',
     alertFuture: 'The selected date and time must be in the future.',
     shuttingDown: 'Shutting down…',
+    autoLaunch: 'Launch at system startup',
   },
   uk: {
     tag: 'uk-UA',
@@ -36,6 +37,7 @@ const LOCALES = {
     alertPickDateTime: 'Оберіть дату і час.',
     alertFuture: 'Обрані дата й час мають бути в майбутньому.',
     shuttingDown: 'Вимикається…',
+    autoLaunch: 'Запускати разом із системою',
   },
   es: {
     tag: 'es-ES',
@@ -55,6 +57,7 @@ const LOCALES = {
     alertPickDateTime: 'Selecciona una fecha y una hora.',
     alertFuture: 'La fecha y hora seleccionadas deben ser futuras.',
     shuttingDown: 'Apagando…',
+    autoLaunch: 'Iniciar al arrancar el sistema',
   },
   fr: {
     tag: 'fr-FR',
@@ -74,6 +77,7 @@ const LOCALES = {
     alertPickDateTime: 'Veuillez choisir une date et une heure.',
     alertFuture: "La date et l'heure choisies doivent être dans le futur.",
     shuttingDown: 'Extinction…',
+    autoLaunch: 'Lancer au démarrage du système',
   },
   de: {
     tag: 'de-DE',
@@ -93,6 +97,7 @@ const LOCALES = {
     alertPickDateTime: 'Bitte Datum und Uhrzeit auswählen.',
     alertFuture: 'Das gewählte Datum und die Uhrzeit müssen in der Zukunft liegen.',
     shuttingDown: 'Wird heruntergefahren…',
+    autoLaunch: 'Beim Systemstart starten',
   },
 };
 
@@ -240,6 +245,12 @@ window.api.onStatusChanged((status) => {
   }
 });
 
+const autoLaunchCheckbox = document.getElementById('auto-launch');
+autoLaunchCheckbox.addEventListener('change', async () => {
+  const applied = await window.api.setAutoLaunch(autoLaunchCheckbox.checked);
+  autoLaunchCheckbox.checked = applied;
+});
+
 (async () => {
   applyTranslations();
   window.api.setLocale(currentLang);
@@ -248,6 +259,8 @@ window.api.onStatusChanged((status) => {
   if (status.active) {
     startCountdownDisplay(status.targetTime);
   }
+
+  autoLaunchCheckbox.checked = await window.api.getAutoLaunch();
 
   const now = new Date();
   document.getElementById('schedule-date').value = now.toISOString().slice(0, 10);

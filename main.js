@@ -1,6 +1,12 @@
 const { app, BrowserWindow, Tray, Menu, ipcMain, dialog, nativeImage } = require('electron');
 const { exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
+
+app.setName('PowerDown');
+
+const ICON_PATH = path.join(__dirname, 'assets', 'icon.png');
 
 const LOCALES = {
   en: {
@@ -116,6 +122,43 @@ function getStatus() {
   return { active: targetTime !== null, targetTime };
 }
 
+// --- Auto-launch on system startup ---
+// macOS/Windows use the native login-item API; Linux uses an XDG autostart
+// .desktop file, since Electron's login-item API doesn't cover it.
+const linuxAutostartFile = path.join(os.homedir(), '.config', 'autostart', 'powerdown.desktop');
+
+function getAutoLaunch() {
+  if (process.platform === 'linux') {
+    return fs.existsSync(linuxAutostartFile);
+  }
+  return app.getLoginItemSettings().openAtLogin;
+}
+
+function setAutoLaunch(enabled) {
+  if (process.platform === 'linux') {
+    if (enabled) {
+      const execCmd = app.isPackaged
+        ? `"${process.execPath}"`
+        : `"${process.execPath}" "${app.getAppPath()}"`;
+      const desktopEntry = [
+        '[Desktop Entry]',
+        'Type=Application',
+        'Name=PowerDown',
+        `Exec=${execCmd}`,
+        'X-GNOME-Autostart-enabled=true',
+        'Terminal=false',
+        '',
+      ].join('\n');
+      fs.mkdirSync(path.dirname(linuxAutostartFile), { recursive: true });
+      fs.writeFileSync(linuxAutostartFile, desktopEntry);
+    } else if (fs.existsSync(linuxAutostartFile)) {
+      fs.rmSync(linuxAutostartFile);
+    }
+    return;
+  }
+  app.setLoginItemSettings({ openAtLogin: enabled });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 420,
@@ -191,6 +234,12 @@ function updateTrayMenu() {
 }
 
 app.whenReady().then(() => {
+  // In development on macOS the Dock shows the generic Electron icon; set ours explicitly.
+  if (process.platform === 'darwin' && app.dock) {
+    const dockIcon = nativeImage.createFromPath(ICON_PATH);
+    if (!dockIcon.isEmpty()) app.dock.setIcon(dockIcon);
+  }
+
   createWindow();
   createTray();
 
@@ -230,4 +279,11 @@ ipcMain.on('set-locale', (_event, lang) => {
     currentLocale = lang;
     updateTrayMenu();
   }
+});
+
+ipcMain.handle('get-auto-launch', () => getAutoLaunch());
+
+ipcMain.handle('set-auto-launch', (_event, enabled) => {
+  setAutoLaunch(enabled);
+  return getAutoLaunch();
 });
