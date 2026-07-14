@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('api', {
   setLocale: (lang) => ipcRenderer.send('set-locale', lang),
   getAutoLaunch: () => ipcRenderer.invoke('get-auto-launch'),
   setAutoLaunch: (enabled) => ipcRenderer.invoke('set-auto-launch', enabled),
+  resizeWindow: (height) => ipcRenderer.send('resize-window', height),
   onStatusChanged: (callback) => {
     ipcRenderer.on('status-changed', (_event, status) => callback(status));
   },
