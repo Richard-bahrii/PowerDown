@@ -258,19 +258,23 @@ button.danger:hover {
 }
 
 .setting-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
+  /* Full-width separator; the clickable toggle inside is only as wide as its content. */
   margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
   font-size: 14px;
   color: var(--text);
   cursor: pointer;
 }
 
-.setting-row input[type="checkbox"] {
+.toggle input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--yellow);
