@@ -76,12 +76,6 @@ h1 {
   display: block;
 }
 
-.row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
 label {
   flex: 1;
   display: flex;
@@ -89,6 +83,10 @@ label {
   gap: 6px;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.tab-panel label {
+  margin-bottom: 18px;
 }
 
 input {
