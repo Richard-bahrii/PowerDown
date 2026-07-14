@@ -240,7 +240,10 @@ function localeUses12h(tag: string): boolean {
 // taller than the window) would overflow and show a scrollbar. Grow the window
 // to fit the open picker, then shrink back to the content on close.
 function fitWindowToOpenPicker(instance: FlatpickrInstance): void {
-  const needed = Math.ceil(instance.calendarContainer.getBoundingClientRect().bottom) + 12;
+  // Leave a clear gap below the open calendar so it isn't flush against the
+  // window edge (which left a tiny scrollbar).
+  const bottomGap = 28;
+  const needed = Math.ceil(instance.calendarContainer.getBoundingClientRect().bottom) + bottomGap;
   if (window.api && window.api.resizeWindow) {
     window.api.resizeWindow(Math.max(document.body.offsetHeight, needed));
   }
@@ -262,7 +265,10 @@ function initPickers(): void {
   // is a duration (no AM/PM), so it always stays 24-hour.
   const use12h = localeUses12h(LOCALES[currentLang].tag);
 
-  const onOpen: FlatpickrHook = (_dates, _str, instance) => fitWindowToOpenPicker(instance);
+  // flatpickr finalizes the calendar's position after the onOpen hook, so defer
+  // the measurement a tick to read its settled bottom rather than a mid-open one.
+  const onOpen: FlatpickrHook = (_dates, _str, instance) =>
+    setTimeout(() => fitWindowToOpenPicker(instance), 0);
   const onClose: FlatpickrHook = () => resizeToContent();
 
   timerPicker = flatpickr('#timer-duration', {
