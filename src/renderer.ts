@@ -230,6 +230,12 @@ function fpLocale(): string {
   return currentLang === 'en' ? 'default' : currentLang;
 }
 
+// Whether the given locale expresses clock times as 12-hour with AM/PM
+// (e.g. en-US) rather than 24-hour (e.g. uk-UA, de-DE).
+function localeUses12h(tag: string): boolean {
+  return new Intl.DateTimeFormat(tag, { hour: 'numeric' }).resolvedOptions().hour12 === true;
+}
+
 function initPickers(): void {
   const timerDefault: Date | string =
     timerPicker && timerPicker.selectedDates[0] ? timerPicker.selectedDates[0] : '00:30';
@@ -240,6 +246,11 @@ function initPickers(): void {
 
   if (timerPicker) timerPicker.destroy();
   if (schedulePicker) schedulePicker.destroy();
+
+  // The scheduled value is a clock time, so follow the locale's 12h/24h
+  // convention and offer an AM/PM toggle where that's expected. The timer tab
+  // is a duration (no AM/PM), so it always stays 24-hour.
+  const use12h = localeUses12h(LOCALES[currentLang].tag);
 
   timerPicker = flatpickr('#timer-duration', {
     enableTime: true,
@@ -253,8 +264,8 @@ function initPickers(): void {
 
   schedulePicker = flatpickr('#schedule-datetime', {
     enableTime: true,
-    dateFormat: 'Y-m-d H:i',
-    time_24hr: true,
+    dateFormat: use12h ? 'Y-m-d h:i K' : 'Y-m-d H:i',
+    time_24hr: !use12h,
     minDate: 'today',
     defaultDate: scheduleDefault,
     locale: fpLocale(),
