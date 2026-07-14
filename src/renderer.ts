@@ -245,7 +245,7 @@ function fitWindowToOpenPicker(instance: FlatpickrInstance): void {
   // positioned bottom, which flatpickr derives from the current window size and
   // so varied between the first and later opens. Plus a gap so the calendar
   // isn't flush against the window edge (which left a tiny scrollbar).
-  const bottomGap = 28;
+  const bottomGap = 38;
   const inputBottom = Math.ceil(instance.input.getBoundingClientRect().bottom);
   const needed = inputBottom + instance.calendarContainer.offsetHeight + bottomGap;
   if (window.api && window.api.resizeWindow) {
