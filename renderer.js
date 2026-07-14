@@ -131,10 +131,49 @@ function setLanguage(lang) {
   window.api.setLocale(lang);
 }
 
-const languageSelect = document.getElementById('language-select');
-languageSelect.value = currentLang;
-languageSelect.addEventListener('change', () => {
-  setLanguage(languageSelect.value);
+// --- Custom language dropdown (native <select> can't render flag images) ---
+const langSelect = document.getElementById('lang-select');
+const langTrigger = document.getElementById('lang-trigger');
+const langMenu = document.getElementById('lang-menu');
+const langCurrentFlag = document.getElementById('lang-current-flag');
+const langCurrentName = document.getElementById('lang-current-name');
+const langOptions = Array.from(langMenu.querySelectorAll('[data-lang]'));
+
+function updateLangTrigger(lang) {
+  const option = langOptions.find((li) => li.dataset.lang === lang) || langOptions[0];
+  langCurrentFlag.src = option.querySelector('.flag').src;
+  langCurrentName.textContent = option.querySelector('span').textContent;
+  langOptions.forEach((li) => li.classList.toggle('selected', li === option));
+}
+
+function openLangMenu() {
+  langSelect.classList.add('open');
+  langTrigger.setAttribute('aria-expanded', 'true');
+}
+
+function closeLangMenu() {
+  langSelect.classList.remove('open');
+  langTrigger.setAttribute('aria-expanded', 'false');
+}
+
+langTrigger.addEventListener('click', () => {
+  langSelect.classList.contains('open') ? closeLangMenu() : openLangMenu();
+});
+
+langOptions.forEach((li) => {
+  li.addEventListener('click', () => {
+    setLanguage(li.dataset.lang);
+    updateLangTrigger(li.dataset.lang);
+    closeLangMenu();
+  });
+});
+
+document.addEventListener('click', (event) => {
+  if (!langSelect.contains(event.target)) closeLangMenu();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeLangMenu();
 });
 
 const tabButtons = document.querySelectorAll('.tab-btn');
@@ -304,6 +343,7 @@ autoLaunchCheckbox.addEventListener('change', async () => {
 
 (async () => {
   applyTranslations();
+  updateLangTrigger(currentLang);
   initPickers();
   resizeToContent();
   window.api.setLocale(currentLang);

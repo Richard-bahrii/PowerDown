@@ -10,13 +10,20 @@
 <body>
   <div class="top-bar">
     <h1 data-i18n="appTitle">Turn off the computer</h1>
-    <select id="language-select">
-      <option value="en">English</option>
-      <option value="uk">Українська</option>
-      <option value="es">Español</option>
-      <option value="fr">Français</option>
-      <option value="de">Deutsch</option>
-    </select>
+    <div class="lang-select" id="lang-select">
+      <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
+        <img class="flag" id="lang-current-flag" alt="" />
+        <span id="lang-current-name"></span>
+        <span class="caret" aria-hidden="true">▾</span>
+      </button>
+      <ul class="lang-menu" id="lang-menu" role="listbox">
+        <li role="option" data-lang="en"><img class="flag" src="assets/vendor/flags/gb.svg" alt="" /><span>English</span></li>
+        <li role="option" data-lang="uk"><img class="flag" src="assets/vendor/flags/ua.svg" alt="" /><span>Українська</span></li>
+        <li role="option" data-lang="es"><img class="flag" src="assets/vendor/flags/es.svg" alt="" /><span>Español</span></li>
+        <li role="option" data-lang="fr"><img class="flag" src="assets/vendor/flags/fr.svg" alt="" /><span>Français</span></li>
+        <li role="option" data-lang="de"><img class="flag" src="assets/vendor/flags/de.svg" alt="" /><span>Deutsch</span></li>
+      </ul>
+    </div>
   </div>
 
   <div class="tabs">
