@@ -213,6 +213,7 @@ function formatDuration(ms) {
 
 function startCountdownDisplay(targetTimestamp) {
   currentTarget = targetTimestamp;
+  document.body.classList.add('shutdown-active');
   statusBox.classList.remove('hidden');
   statusTarget.textContent = formatDateTime(targetTimestamp);
 
@@ -236,6 +237,7 @@ function stopCountdownDisplay() {
     countdownIntervalId = null;
   }
   currentTarget = null;
+  document.body.classList.remove('shutdown-active');
   statusBox.classList.add('hidden');
 }
 

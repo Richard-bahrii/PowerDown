@@ -76,6 +76,12 @@ h1 {
   display: block;
 }
 
+/* While a shutdown is scheduled, hide the input UI and show only the countdown. */
+body.shutdown-active .tabs,
+body.shutdown-active .tab-panel {
+  display: none;
+}
+
 label {
   flex: 1;
   display: flex;
