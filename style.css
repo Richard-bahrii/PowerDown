@@ -209,3 +209,103 @@ button.danger:hover {
   color: #7a7a75;
   text-align: center;
 }
+
+/* --- flatpickr dark theme, tuned to the yellow/black palette --- */
+.flatpickr-calendar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+}
+
+.flatpickr-calendar.arrowTop::before,
+.flatpickr-calendar.arrowTop::after {
+  border-bottom-color: var(--surface);
+}
+.flatpickr-calendar.arrowBottom::before,
+.flatpickr-calendar.arrowBottom::after {
+  border-top-color: var(--surface);
+}
+
+.flatpickr-months,
+.flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-weekdays,
+span.flatpickr-weekday {
+  background: transparent;
+  color: var(--text);
+  fill: var(--text);
+}
+
+span.flatpickr-weekday {
+  color: var(--text-muted);
+}
+
+.flatpickr-prev-month svg,
+.flatpickr-next-month svg {
+  fill: var(--text);
+}
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg {
+  fill: var(--yellow);
+}
+
+.flatpickr-current-month input.cur-year {
+  color: var(--text);
+}
+
+.flatpickr-day {
+  color: var(--text);
+  border-radius: 6px;
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+  background: var(--surface-hover);
+  border-color: var(--surface-hover);
+}
+
+.flatpickr-day.today {
+  border-color: var(--yellow);
+}
+.flatpickr-day.today:hover {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--black);
+  font-weight: 600;
+}
+
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  color: #5a5a55;
+}
+
+.flatpickr-time input,
+.flatpickr-time .flatpickr-time-separator,
+.flatpickr-time .flatpickr-am-pm {
+  color: var(--text);
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:hover {
+  background: var(--surface-hover);
+}
+
+.flatpickr-time {
+  border-top: 1px solid var(--border);
+}
+
+.numInputWrapper span.arrowUp::after {
+  border-bottom-color: var(--yellow);
+}
+.numInputWrapper span.arrowDown::after {
+  border-top-color: var(--yellow);
+}

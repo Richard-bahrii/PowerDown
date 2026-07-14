@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
   <title>PowerDown</title>
+  <link rel="stylesheet" href="assets/vendor/flatpickr/flatpickr.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -24,16 +25,10 @@
   </div>
 
   <section id="tab-timer" class="tab-panel active">
-    <div class="row">
-      <label>
-        <span data-i18n="hoursLabel">Hours</span>
-        <input type="number" id="timer-hours" min="0" max="23" value="0" />
-      </label>
-      <label>
-        <span data-i18n="minutesLabel">Minutes</span>
-        <input type="number" id="timer-minutes" min="0" max="59" value="30" />
-      </label>
-    </div>
+    <label>
+      <span data-i18n="durationLabel">Time until shutdown (h : mm)</span>
+      <input type="text" id="timer-duration" placeholder="00:30" />
+    </label>
     <div class="quick-buttons">
       <button data-minutes="15" data-quick-index="0">15 min</button>
       <button data-minutes="30" data-quick-index="1">30 min</button>
@@ -44,16 +39,10 @@
   </section>
 
   <section id="tab-schedule" class="tab-panel">
-    <div class="row">
-      <label>
-        <span data-i18n="dateLabel">Date</span>
-        <input type="date" id="schedule-date" />
-      </label>
-      <label>
-        <span data-i18n="timeLabel">Time</span>
-        <input type="time" id="schedule-time" />
-      </label>
-    </div>
+    <label>
+      <span data-i18n="dateTimeLabel">Date and time</span>
+      <input type="text" id="schedule-datetime" placeholder="2026-07-14 23:30" />
+    </label>
     <button id="start-schedule" class="primary" data-i18n="startBtn">Schedule shutdown</button>
   </section>
 
@@ -71,6 +60,11 @@
 
   <p class="hint" data-i18n="hint">Closing the window does not cancel the scheduled shutdown — the app will minimize to the tray.</p>
 
+  <script src="assets/vendor/flatpickr/flatpickr.min.js"></script>
+  <script src="assets/vendor/flatpickr/l10n/uk.js"></script>
+  <script src="assets/vendor/flatpickr/l10n/es.js"></script>
+  <script src="assets/vendor/flatpickr/l10n/fr.js"></script>
+  <script src="assets/vendor/flatpickr/l10n/de.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

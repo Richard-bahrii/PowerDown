@@ -4,12 +4,8 @@ const LOCALES = {
     appTitle: 'Turn off the computer',
     tabTimer: 'In...',
     tabSchedule: 'Scheduled',
-    hoursLabel: 'Hours',
-    minutesLabel: 'Minutes',
     quickButtons: ['15 min', '30 min', '1 h', '2 h'],
     startBtn: 'Schedule shutdown',
-    dateLabel: 'Date',
-    timeLabel: 'Time',
     statusWillShutdown: 'The computer will shut down:',
     cancelBtn: 'Cancel',
     hint: 'Closing the window does not cancel the scheduled shutdown — the app will minimize to the tray.',
@@ -18,18 +14,16 @@ const LOCALES = {
     alertFuture: 'The selected date and time must be in the future.',
     shuttingDown: 'Shutting down…',
     autoLaunch: 'Launch at system startup',
+    durationLabel: 'Time until shutdown (h : mm)',
+    dateTimeLabel: 'Date and time',
   },
   uk: {
     tag: 'uk-UA',
     appTitle: 'Вимкнення компʼютера',
     tabTimer: 'Через час',
     tabSchedule: 'За розкладом',
-    hoursLabel: 'Годин',
-    minutesLabel: 'Хвилин',
     quickButtons: ['15 хв', '30 хв', '1 год', '2 год'],
     startBtn: 'Запланувати вимкнення',
-    dateLabel: 'Дата',
-    timeLabel: 'Час',
     statusWillShutdown: 'Компʼютер вимкнеться:',
     cancelBtn: 'Скасувати',
     hint: 'Закриття вікна не скасовує заплановане вимкнення — застосунок згорнеться в трей.',
@@ -38,18 +32,16 @@ const LOCALES = {
     alertFuture: 'Обрані дата й час мають бути в майбутньому.',
     shuttingDown: 'Вимикається…',
     autoLaunch: 'Запускати разом із системою',
+    durationLabel: 'Час до вимкнення (год : хв)',
+    dateTimeLabel: 'Дата й час',
   },
   es: {
     tag: 'es-ES',
     appTitle: 'Apagar el ordenador',
     tabTimer: 'En...',
     tabSchedule: 'Programado',
-    hoursLabel: 'Horas',
-    minutesLabel: 'Minutos',
     quickButtons: ['15 min', '30 min', '1 h', '2 h'],
     startBtn: 'Programar apagado',
-    dateLabel: 'Fecha',
-    timeLabel: 'Hora',
     statusWillShutdown: 'El ordenador se apagará:',
     cancelBtn: 'Cancelar',
     hint: 'Cerrar la ventana no cancela el apagado programado; la aplicación se minimizará a la bandeja.',
@@ -58,18 +50,16 @@ const LOCALES = {
     alertFuture: 'La fecha y hora seleccionadas deben ser futuras.',
     shuttingDown: 'Apagando…',
     autoLaunch: 'Iniciar al arrancar el sistema',
+    durationLabel: 'Tiempo hasta el apagado (h : mm)',
+    dateTimeLabel: 'Fecha y hora',
   },
   fr: {
     tag: 'fr-FR',
     appTitle: "Éteindre l'ordinateur",
     tabTimer: 'Dans...',
     tabSchedule: 'Programmé',
-    hoursLabel: 'Heures',
-    minutesLabel: 'Minutes',
     quickButtons: ['15 min', '30 min', '1 h', '2 h'],
     startBtn: "Programmer l'extinction",
-    dateLabel: 'Date',
-    timeLabel: 'Heure',
     statusWillShutdown: "L'ordinateur s'éteindra :",
     cancelBtn: 'Annuler',
     hint: "Fermer la fenêtre n'annule pas l'extinction programmée ; l'application se réduira dans la zone de notification.",
@@ -78,18 +68,16 @@ const LOCALES = {
     alertFuture: "La date et l'heure choisies doivent être dans le futur.",
     shuttingDown: 'Extinction…',
     autoLaunch: 'Lancer au démarrage du système',
+    durationLabel: "Temps avant l'extinction (h : mm)",
+    dateTimeLabel: 'Date et heure',
   },
   de: {
     tag: 'de-DE',
     appTitle: 'Computer ausschalten',
     tabTimer: 'In...',
     tabSchedule: 'Geplant',
-    hoursLabel: 'Stunden',
-    minutesLabel: 'Minuten',
     quickButtons: ['15 Min', '30 Min', '1 Std', '2 Std'],
     startBtn: 'Ausschalten planen',
-    dateLabel: 'Datum',
-    timeLabel: 'Uhrzeit',
     statusWillShutdown: 'Der Computer wird ausgeschaltet:',
     cancelBtn: 'Abbrechen',
     hint: 'Das Schließen des Fensters bricht das geplante Herunterfahren nicht ab — die App wird in die Ablage minimiert.',
@@ -98,6 +86,8 @@ const LOCALES = {
     alertFuture: 'Das gewählte Datum und die Uhrzeit müssen in der Zukunft liegen.',
     shuttingDown: 'Wird heruntergefahren…',
     autoLaunch: 'Beim Systemstart starten',
+    durationLabel: 'Zeit bis zum Ausschalten (Std : Min)',
+    dateTimeLabel: 'Datum und Uhrzeit',
   },
 };
 
@@ -127,6 +117,7 @@ function setLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('lang', lang);
   applyTranslations();
+  initPickers();
   window.api.setLocale(lang);
 }
 
@@ -148,11 +139,56 @@ tabButtons.forEach((btn) => {
   });
 });
 
+// --- flatpickr date/time pickers ---
+// Timer tab: a calendar-less 24h time field acts as an H:MM duration, which
+// inherently constrains input to 0–23 h and 0–59 min. Scheduled tab: a full
+// date+time field that can't be set earlier than today.
+let timerPicker = null;
+let schedulePicker = null;
+
+function fpLocale() {
+  // uk/es/fr/de are registered on flatpickr.l10ns by the vendored l10n scripts;
+  // 'default' is flatpickr's built-in English.
+  return currentLang === 'en' ? 'default' : currentLang;
+}
+
+function initPickers() {
+  const timerDefault =
+    timerPicker && timerPicker.selectedDates[0] ? timerPicker.selectedDates[0] : '00:30';
+  const scheduleDefault =
+    schedulePicker && schedulePicker.selectedDates[0]
+      ? schedulePicker.selectedDates[0]
+      : new Date(Date.now() + 60 * 60 * 1000);
+
+  if (timerPicker) timerPicker.destroy();
+  if (schedulePicker) schedulePicker.destroy();
+
+  timerPicker = flatpickr('#timer-duration', {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: 'H:i',
+    time_24hr: true,
+    minuteIncrement: 1,
+    defaultDate: timerDefault,
+    locale: fpLocale(),
+  });
+
+  schedulePicker = flatpickr('#schedule-datetime', {
+    enableTime: true,
+    dateFormat: 'Y-m-d H:i',
+    time_24hr: true,
+    minDate: 'today',
+    defaultDate: scheduleDefault,
+    locale: fpLocale(),
+  });
+}
+
 document.querySelectorAll('.quick-buttons button').forEach((btn) => {
   btn.addEventListener('click', () => {
     const minutes = parseInt(btn.dataset.minutes, 10);
-    document.getElementById('timer-hours').value = Math.floor(minutes / 60);
-    document.getElementById('timer-minutes').value = minutes % 60;
+    const h = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const m = String(minutes % 60).padStart(2, '0');
+    if (timerPicker) timerPicker.setDate(`${h}:${m}`, false);
   });
 });
 
@@ -204,8 +240,9 @@ function stopCountdownDisplay() {
 }
 
 document.getElementById('start-timer').addEventListener('click', () => {
-  const hours = parseInt(document.getElementById('timer-hours').value, 10) || 0;
-  const minutes = parseInt(document.getElementById('timer-minutes').value, 10) || 0;
+  const picked = timerPicker.selectedDates[0];
+  const hours = picked ? picked.getHours() : 0;
+  const minutes = picked ? picked.getMinutes() : 0;
   const totalMs = (hours * 3600 + minutes * 60) * 1000;
   if (totalMs <= 0) {
     alert(t('alertTimeZero'));
@@ -217,13 +254,12 @@ document.getElementById('start-timer').addEventListener('click', () => {
 });
 
 document.getElementById('start-schedule').addEventListener('click', () => {
-  const dateVal = document.getElementById('schedule-date').value;
-  const timeVal = document.getElementById('schedule-time').value;
-  if (!dateVal || !timeVal) {
+  const picked = schedulePicker.selectedDates[0];
+  if (!picked) {
     alert(t('alertPickDateTime'));
     return;
   }
-  const target = new Date(`${dateVal}T${timeVal}`).getTime();
+  const target = picked.getTime();
   if (Number.isNaN(target) || target <= Date.now()) {
     alert(t('alertFuture'));
     return;
@@ -253,6 +289,7 @@ autoLaunchCheckbox.addEventListener('change', async () => {
 
 (async () => {
   applyTranslations();
+  initPickers();
   window.api.setLocale(currentLang);
 
   const status = await window.api.getStatus();
@@ -261,10 +298,4 @@ autoLaunchCheckbox.addEventListener('change', async () => {
   }
 
   autoLaunchCheckbox.checked = await window.api.getAutoLaunch();
-
-  const now = new Date();
-  document.getElementById('schedule-date').value = now.toISOString().slice(0, 10);
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('schedule-time').value = `${hh}:${mm}`;
 })();
