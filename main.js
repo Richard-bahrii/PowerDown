@@ -282,6 +282,13 @@ ipcMain.on('set-locale', (_event, lang) => {
   }
 });
 
+ipcMain.on('resize-window', (_event, height) => {
+  if (!mainWindow) return;
+  const [width] = mainWindow.getContentSize();
+  const clamped = Math.max(200, Math.min(1200, Math.round(height)));
+  mainWindow.setContentSize(width, clamped, false);
+});
+
 ipcMain.handle('get-auto-launch', () => getAutoLaunch());
 
 ipcMain.handle('set-auto-launch', (_event, enabled) => {

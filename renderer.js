@@ -112,12 +112,22 @@ function applyTranslations() {
   }
 }
 
+// Match the window to the currently visible content, so switching tabs or
+// entering the countdown view doesn't leave empty space. flatpickr popups are
+// absolutely positioned and don't affect body.offsetHeight, so it stays stable.
+function resizeToContent() {
+  if (window.api && window.api.resizeWindow) {
+    window.api.resizeWindow(document.body.offsetHeight);
+  }
+}
+
 function setLanguage(lang) {
   if (!LOCALES[lang]) lang = DEFAULT_LANG;
   currentLang = lang;
   localStorage.setItem('lang', lang);
   applyTranslations();
   initPickers();
+  resizeToContent();
   window.api.setLocale(lang);
 }
 
@@ -136,6 +146,7 @@ tabButtons.forEach((btn) => {
     tabPanels.forEach((p) => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    resizeToContent();
   });
 });
 
@@ -216,6 +227,7 @@ function startCountdownDisplay(targetTimestamp) {
   document.body.classList.add('shutdown-active');
   statusBox.classList.remove('hidden');
   statusTarget.textContent = formatDateTime(targetTimestamp);
+  resizeToContent();
 
   if (countdownIntervalId) clearInterval(countdownIntervalId);
   const tick = () => {
@@ -239,6 +251,7 @@ function stopCountdownDisplay() {
   currentTarget = null;
   document.body.classList.remove('shutdown-active');
   statusBox.classList.add('hidden');
+  resizeToContent();
 }
 
 document.getElementById('start-timer').addEventListener('click', () => {
@@ -292,6 +305,7 @@ autoLaunchCheckbox.addEventListener('change', async () => {
 (async () => {
   applyTranslations();
   initPickers();
+  resizeToContent();
   window.api.setLocale(currentLang);
 
   const status = await window.api.getStatus();
