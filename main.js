@@ -162,7 +162,8 @@ function setAutoLaunch(enabled) {
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 420,
-    height: 560,
+    height: 470,
+    useContentSize: true,
     resizable: false,
     backgroundColor: '#1b1b1e',
     icon: path.join(__dirname, 'assets', 'icon.png'),
