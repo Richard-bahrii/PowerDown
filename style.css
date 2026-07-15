@@ -165,6 +165,12 @@ body.shutdown-active .tab-panel {
   cursor: pointer;
 }
 
+.field-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #7a7a75;
+}
+
 input {
   background: var(--surface);
   border: 1px solid var(--border);
