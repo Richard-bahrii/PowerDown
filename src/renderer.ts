@@ -270,10 +270,18 @@ function initPickers(): void {
   const use12h = localeUses12h(LOCALES[currentLang].tag);
 
   // flatpickr finalizes the calendar's position after the onOpen hook, so defer
-  // the measurement a tick to read its settled bottom rather than a mid-open one.
-  const onOpen: FlatpickrHook = (_dates, _str, instance) =>
-    setTimeout(() => fitWindowToOpenPicker(instance), 0);
+  // the work a tick: read the settled height (to fit the window) and, for the
+  // time-only timer, stretch the popup to the input width so it lines up.
   const onClose: FlatpickrHook = () => resizeToContent();
+  const makeOnOpen =
+    (stretchToInput: boolean): FlatpickrHook =>
+    (_dates, _str, instance) =>
+      setTimeout(() => {
+        if (stretchToInput) {
+          instance.calendarContainer.style.width = instance.input.offsetWidth + 'px';
+        }
+        fitWindowToOpenPicker(instance);
+      }, 0);
 
   timerPicker = flatpickr('#timer-duration', {
     enableTime: true,
@@ -283,8 +291,8 @@ function initPickers(): void {
     minuteIncrement: 1,
     defaultDate: timerDefault,
     locale: fpLocale(),
-    position: 'below',
-    onOpen,
+    position: 'below', // full width, aligned to the input (see makeOnOpen)
+    onOpen: makeOnOpen(true),
     onClose,
   });
 
@@ -295,8 +303,8 @@ function initPickers(): void {
     minDate: 'today',
     defaultDate: scheduleDefault,
     locale: fpLocale(),
-    position: 'below',
-    onOpen,
+    position: 'below center', // centered under the input
+    onOpen: makeOnOpen(false),
     onClose,
   });
 }

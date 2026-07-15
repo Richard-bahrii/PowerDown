@@ -387,3 +387,14 @@ span.flatpickr-weekday {
 .numInputWrapper span.arrowDown::after {
   border-top-color: var(--yellow);
 }
+
+/* The timer's time-only popup is stretched to the input width (see renderer);
+   keep the H:MM controls compact and centered inside that full-width box. */
+.flatpickr-calendar.noCalendar .flatpickr-time {
+  max-width: none;
+  justify-content: center;
+}
+.flatpickr-calendar.noCalendar .flatpickr-time .numInputWrapper {
+  flex: 0 0 auto;
+  width: 4.5em;
+}
