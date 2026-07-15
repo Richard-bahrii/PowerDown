@@ -369,6 +369,14 @@ span.flatpickr-weekday {
 .flatpickr-time .flatpickr-time-separator,
 .flatpickr-time .flatpickr-am-pm {
   color: var(--text);
+  font-size: 16px;
+}
+
+/* The timer's time-only popup is the primary control there, so make its
+   H:MM noticeably larger and easier to read/adjust. */
+.flatpickr-calendar.noCalendar .flatpickr-time input,
+.flatpickr-calendar.noCalendar .flatpickr-time .flatpickr-time-separator {
+  font-size: 22px;
 }
 
 .flatpickr-time input:hover,
