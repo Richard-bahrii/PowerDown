@@ -15,6 +15,7 @@ interface UiLocale {
   autoLaunch: string;
   durationLabel: string;
   dateTimeLabel: string;
+  timerHint: string;
 }
 
 const LOCALES: Record<Lang, UiLocale> = {
@@ -35,6 +36,7 @@ const LOCALES: Record<Lang, UiLocale> = {
     autoLaunch: 'Launch at system startup',
     durationLabel: 'Time until shutdown (h : mm)',
     dateTimeLabel: 'Date and time',
+    timerHint: 'Up to 24 hours — for a later time, use Scheduled.',
   },
   uk: {
     tag: 'uk-UA',
@@ -53,6 +55,7 @@ const LOCALES: Record<Lang, UiLocale> = {
     autoLaunch: 'Запускати разом із системою',
     durationLabel: 'Час до вимкнення (год : хв)',
     dateTimeLabel: 'Дата й час',
+    timerHint: 'До 24 годин — для пізнішого часу відкрий «За розкладом».',
   },
   es: {
     tag: 'es-ES',
@@ -71,6 +74,7 @@ const LOCALES: Record<Lang, UiLocale> = {
     autoLaunch: 'Iniciar al arrancar el sistema',
     durationLabel: 'Tiempo hasta el apagado (h : mm)',
     dateTimeLabel: 'Fecha y hora',
+    timerHint: 'Hasta 24 horas: para más tarde, usa Programado.',
   },
   fr: {
     tag: 'fr-FR',
@@ -89,6 +93,7 @@ const LOCALES: Record<Lang, UiLocale> = {
     autoLaunch: 'Lancer au démarrage du système',
     durationLabel: "Temps avant l'extinction (h : mm)",
     dateTimeLabel: 'Date et heure',
+    timerHint: "Jusqu'à 24 heures — pour plus tard, utilisez Programmé.",
   },
   de: {
     tag: 'de-DE',
@@ -107,6 +112,7 @@ const LOCALES: Record<Lang, UiLocale> = {
     autoLaunch: 'Beim Systemstart starten',
     durationLabel: 'Zeit bis zum Ausschalten (Std : Min)',
     dateTimeLabel: 'Datum und Uhrzeit',
+    timerHint: 'Bis zu 24 Stunden — für später „Geplant“ verwenden.',
   },
 };
 
@@ -270,10 +276,18 @@ function initPickers(): void {
   const use12h = localeUses12h(LOCALES[currentLang].tag);
 
   // flatpickr finalizes the calendar's position after the onOpen hook, so defer
-  // the measurement a tick to read its settled bottom rather than a mid-open one.
-  const onOpen: FlatpickrHook = (_dates, _str, instance) =>
-    setTimeout(() => fitWindowToOpenPicker(instance), 0);
+  // the work a tick: read the settled height (to fit the window) and, for the
+  // time-only timer, stretch the popup to the input width so it lines up.
   const onClose: FlatpickrHook = () => resizeToContent();
+  const makeOnOpen =
+    (stretchToInput: boolean): FlatpickrHook =>
+    (_dates, _str, instance) =>
+      setTimeout(() => {
+        if (stretchToInput) {
+          instance.calendarContainer.style.width = instance.input.offsetWidth + 'px';
+        }
+        fitWindowToOpenPicker(instance);
+      }, 0);
 
   timerPicker = flatpickr('#timer-duration', {
     enableTime: true,
@@ -283,8 +297,8 @@ function initPickers(): void {
     minuteIncrement: 1,
     defaultDate: timerDefault,
     locale: fpLocale(),
-    position: 'below',
-    onOpen,
+    position: 'below', // full width, aligned to the input (see makeOnOpen)
+    onOpen: makeOnOpen(true),
     onClose,
   });
 
@@ -295,8 +309,8 @@ function initPickers(): void {
     minDate: 'today',
     defaultDate: scheduleDefault,
     locale: fpLocale(),
-    position: 'below',
-    onOpen,
+    position: 'below center', // centered under the input
+    onOpen: makeOnOpen(false),
     onClose,
   });
 }
