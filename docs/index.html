@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PowerDown &mdash; schedule the dark</title>
+  <meta name="description" content="PowerDown turns your computer off on a countdown or at an exact date and time. Free, open source, and cross-platform: Windows, macOS, Linux." />
+  <link rel="icon" href="icon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PowerDown &mdash; schedule the dark" />
+  <meta property="og:description" content="Turn your computer off on a countdown or at an exact date and time. Windows, macOS, Linux." />
+  <meta property="og:url" content="https://richard-bahrii.github.io/PowerDown/" />
+  <meta property="og:image" content="https://richard-bahrii.github.io/PowerDown/screenshots/1-timer.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #141419;
+      --surface: #1c1c23;
+      --surface-2: #22222b;
+      --border: #2e2e38;
+      --text: #f3f3f0;
+      --muted: #9a9aa4;
+      --faint: #6b6b76;
+      --accent: #f5d64e;
+      --accent-dim: #d8b93f;
+      --danger: #ff6b6b;
+      --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    a { color: inherit; }
+
+    ::selection { background: var(--accent); color: #17170e; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ---- top bar ---- */
+    header.bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .bar-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.01em; }
+    .brand img { width: 26px; height: 26px; border-radius: 7px; display: block; }
+    .brand b { font-size: 17px; }
+    .bar a.ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; text-decoration: none; color: var(--text);
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 9px;
+      transition: border-color .15s, background .15s;
+    }
+    .bar a.ghost:hover { border-color: var(--accent); background: var(--surface); }
+
+    /* ---- hero ---- */
+    .hero { padding: 92px 0 72px; position: relative; }
+    .glyph {
+      position: absolute; width: 720px; height: 720px; top: -160px; left: 50%; transform: translateX(-50%);
+      opacity: .05; pointer-events: none; z-index: 0;
+    }
+    .hero .wrap { position: relative; z-index: 1; }
+    .eyebrow {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--accent-dim); margin: 0 0 22px;
+    }
+    h1 {
+      font-size: clamp(40px, 7vw, 76px);
+      line-height: 1.02; letter-spacing: -0.035em; font-weight: 800;
+      margin: 0 0 22px; text-wrap: balance; max-width: 14ch;
+    }
+    h1 .off { color: var(--accent); }
+    .lede { font-size: clamp(17px, 2.1vw, 20px); color: var(--muted); max-width: 46ch; margin: 0 0 36px; }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      padding: 13px 22px; border-radius: 11px; border: 1px solid transparent;
+      transition: transform .12s ease, filter .15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: #17170e; }
+    .btn-primary:hover { filter: brightness(1.06); }
+    .btn-ghost { border-color: var(--border); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--accent); }
+    .cta-note { font-family: var(--mono); font-size: 12.5px; color: var(--faint); }
+
+    /* ---- hero countdown card ---- */
+    .clock-card {
+      margin: 60px auto 0;
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 34px 28px 30px;
+      max-width: 560px;
+      box-shadow: 0 30px 80px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.03);
+      position: relative;
+      overflow: hidden;
+    }
+    .clock-card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: .7;
+    }
+    .clock-label {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--muted); text-align: center; margin-bottom: 6px;
+    }
+    .clock-target { font-family: var(--mono); font-size: 13.5px; color: var(--faint); text-align: center; margin-bottom: 14px; }
+    #clock {
+      font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums;
+      font-size: clamp(52px, 12vw, 88px); line-height: 1; letter-spacing: .01em;
+      color: var(--accent); text-align: center;
+      text-shadow: 0 0 40px rgba(245,214,78,.28);
+    }
+    .clock-foot { display: flex; justify-content: center; margin-top: 20px; }
+    .pseudo-cancel {
+      font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--danger);
+      border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--border));
+      border-radius: 9px; padding: 9px 22px; background: transparent;
+    }
+
+    /* ---- section scaffolding ---- */
+    section { padding: 84px 0; border-top: 1px solid var(--border); }
+    .sec-eyebrow {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent-dim); margin: 0 0 14px;
+    }
+    h2 { font-size: clamp(26px, 4vw, 38px); letter-spacing: -0.025em; font-weight: 800; margin: 0 0 12px; text-wrap: balance; }
+    .sec-lede { color: var(--muted); max-width: 52ch; margin: 0 0 44px; font-size: 16.5px; }
+
+    /* ---- screenshots ---- */
+    .shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
+    .shot {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 16px 16px 0; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .shot figcaption {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); padding: 14px 4px 16px; margin: 0;
+    }
+    .shot figcaption b { color: var(--text); font-weight: 700; letter-spacing: normal; text-transform: none; font-family: var(--sans); }
+    .shot img { width: 100%; height: auto; border-radius: 10px 10px 0 0; display: block; box-shadow: 0 -1px 0 var(--border); }
+
+    /* ---- features ---- */
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feat {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 22px 24px;
+      transition: border-color .15s, transform .15s;
+    }
+    .feat:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); transform: translateY(-2px); }
+    .feat .k {
+      font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent-dim); margin-bottom: 12px;
+    }
+    .feat h3 { font-size: 17.5px; margin: 0 0 7px; letter-spacing: -0.01em; }
+    .feat p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+    /* ---- download ---- */
+    .download-kicker {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 44px;
+    }
+    .download-kicker .sec-eyebrow { margin: 0; }
+    .version-pill {
+      font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em;
+      color: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+      border-radius: 999px; padding: 3px 10px;
+    }
+
+    .direct-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 20px; }
+    .direct-card {
+      display: flex; flex-direction: column; gap: 16px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 26px 24px;
+      text-decoration: none; color: var(--text);
+      transition: border-color .15s, transform .15s, background .15s;
+    }
+    .direct-card:hover {
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+      background: var(--surface-2);
+      transform: translateY(-2px);
+    }
+    .direct-card .os-icon { width: 30px; height: 30px; color: var(--text); }
+    .direct-card .os-name { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .direct-card .os-detail { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+    .direct-card .os-cta {
+      margin-top: auto; display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+    }
+    .direct-card .os-cta svg { width: 14px; height: 14px; }
+    .other-arch {
+      font-size: 13.5px; color: var(--faint); margin: 0 0 40px;
+    }
+    .other-arch a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
+    .other-arch a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+    .stores-label {
+      font-family: var(--mono); font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--faint); margin: 0 0 16px;
+    }
+    .plat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .plat {
+      display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px;
+      text-decoration: none; color: var(--text);
+    }
+    .plat .plat-icon { width: 22px; height: 22px; color: var(--muted); }
+    .plat .os { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .plat .name { font-weight: 700; font-size: 16px; }
+    .plat .state { font-size: 13px; }
+    .plat.live { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+    .plat.live:hover { background: var(--surface-2); border-color: var(--accent); }
+    .plat.live .state { color: var(--accent); font-weight: 600; }
+    .plat.soon { opacity: .62; cursor: default; }
+    .plat.soon .state { color: var(--faint); font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
+
+    /* ---- contact ---- */
+    .contact-row {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .contact-copy h2 { margin-bottom: 6px; }
+    .contact-copy p { margin: 0; color: var(--muted); font-size: 15.5px; max-width: 44ch; }
+    .btn-mail svg { width: 17px; height: 17px; }
+
+    /* ---- footer ---- */
+    footer { border-top: 1px solid var(--border); padding: 40px 0 56px; }
+    .foot-inner { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+    .foot-inner p { margin: 0; color: var(--faint); font-size: 13.5px; }
+    .foot-inner .brand b { font-size: 15px; }
+    footer a { color: var(--muted); text-decoration: none; font-size: 13.5px; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 760px) {
+      .shots, .feat-grid, .direct-grid, .plat-grid { grid-template-columns: 1fr; }
+      .hero { padding: 60px 0 48px; }
+      .clock-card { margin-top: 44px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <div class="wrap bar-inner">
+      <div class="brand">
+        <img src="icon.png" alt="PowerDown icon" />
+        <b>PowerDown</b>
+      </div>
+      <a class="ghost" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" aria-hidden="true">
+        <path d="M30 24 A34 34 0 1 0 70 24" />
+        <line x1="50" y1="12" x2="50" y2="50" />
+      </svg>
+      <div class="wrap">
+        <p class="eyebrow">Timer &amp; scheduler &middot; Windows &middot; macOS &middot; Linux</p>
+        <h1>Schedule the <span class="off">dark</span>.</h1>
+        <p class="lede">PowerDown turns your computer off on a countdown or at an exact date and time. Set it, close the window, and get on with your night &mdash; it waits in the tray and shuts down on cue.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">Get it on GitHub</a>
+          <a class="btn btn-ghost" href="#download">See all platforms</a>
+          <span class="cta-note">// free &amp; open source</span>
+        </div>
+
+        <figure class="clock-card">
+          <div class="clock-label">The computer will shut down</div>
+          <div class="clock-target">tonight &middot; 11:30 PM</div>
+          <div id="clock">00:44:59</div>
+          <div class="clock-foot"><span class="pseudo-cancel">Cancel</span></div>
+        </figure>
+      </div>
+    </div>
+
+    <section id="shots">
+      <div class="wrap">
+        <p class="sec-eyebrow">A look inside</p>
+        <h2>Small window, everything at hand.</h2>
+        <p class="sec-lede">One compact window, two ways to schedule, five languages. The window sizes itself to what's on screen &mdash; and grows only while the calendar is open.</p>
+        <div class="shots">
+          <figure class="shot">
+            <img src="screenshots/1-timer.png" width="840" height="912" loading="lazy" alt="Countdown timer tab" />
+            <figcaption><b>Countdown timer</b> &mdash; hours &amp; minutes, or one tap</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="screenshots/3-schedule.png" width="840" height="1120" loading="lazy" alt="Scheduler with calendar open" />
+            <figcaption><b>Scheduler</b> &mdash; a date, a time, 12h or 24h by locale</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="screenshots/2-languages.png" width="840" height="912" loading="lazy" alt="Language dropdown with flags" />
+            <figcaption><b>Five languages</b> &mdash; with flags, follows your OS</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="screenshots/4-countdown.png" width="840" height="780" loading="lazy" alt="Live countdown" />
+            <figcaption><b>Live countdown</b> &mdash; cancel any time before it fires</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <p class="sec-eyebrow">What's inside</p>
+        <h2>Built to be boring in the best way.</h2>
+        <p class="sec-lede">It does one job and does it precisely, on every desktop OS, in your language.</p>
+        <div class="feat-grid">
+          <div class="feat">
+            <div class="k">Two modes</div>
+            <h3>Timer or calendar</h3>
+            <p>Count down from now, or pick an exact date and time to power off.</p>
+          </div>
+          <div class="feat">
+            <div class="k">Cross-platform</div>
+            <h3>Win &middot; macOS &middot; Linux</h3>
+            <p>Picks the right native shutdown command for whatever you're running.</p>
+          </div>
+          <div class="feat">
+            <div class="k">Localized</div>
+            <h3>Five languages</h3>
+            <p>English, Ukrainian, Spanish, French, German &mdash; with flags, matching your system on first run.</p>
+          </div>
+          <div class="feat">
+            <div class="k">Locale clock</div>
+            <h3>12h or 24h</h3>
+            <p>The scheduled time shows AM/PM or 24-hour, whichever your region uses.</p>
+          </div>
+          <div class="feat">
+            <div class="k">Set &amp; forget</div>
+            <h3>Runs in the tray</h3>
+            <p>Close the window and the shutdown still fires. A live countdown, cancellable any time.</p>
+          </div>
+          <div class="feat">
+            <div class="k">Optional</div>
+            <h3>Launch at startup</h3>
+            <p>Have PowerDown ready the moment you log in &mdash; one checkbox.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="download">
+      <div class="wrap">
+        <div class="download-kicker">
+          <p class="sec-eyebrow">Get PowerDown</p>
+          <span class="version-pill">v1.0.0</span>
+        </div>
+        <h2>Download it directly &mdash; no store required.</h2>
+        <p class="sec-lede">While store listings are pending, install straight from a GitHub Release. Free, open source, one file per platform.</p>
+
+        <div class="direct-grid">
+          <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-macOS.dmg">
+            <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.416 2.06-1.25 2.83-.905.84-2.023 1.32-3.09 1.24-.13-1.1.42-2.24 1.24-3.02.86-.82 2.14-1.32 3.1-1.05zM20.62 17.1c-.52 1.2-.77 1.74-1.44 2.8-.93 1.48-2.24 3.32-3.87 3.34-1.44.02-1.81-.94-3.76-.93-1.95.01-2.36.95-3.8.93-1.63-.02-2.87-1.68-3.8-3.16-2.6-4.12-2.87-8.96-1.27-11.53 1.14-1.84 2.94-2.92 4.63-2.92 1.72 0 2.8 1 4.22 1 1.38 0 2.22-1 4.22-1 1.5 0 3.09.82 4.22 2.24-3.71 2.03-3.11 7.32.65 9.23z"/></svg>
+            <span class="os-name">macOS</span>
+            <span class="os-detail">Universal &middot; Apple Silicon &amp; Intel &middot; 168 MB</span>
+            <span class="os-cta">Download .dmg <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+          </a>
+          <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-Windows-Setup.exe">
+            <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.4 4.5 10.4 11.3 3 11.3zM11.3 4.4 21 3v8.2h-9.7zM3 12.2 10.4 12.2 10.4 19.1 3 18zM11.3 12.2 21 12.2 21 21 11.3 19.6z"/></svg>
+            <span class="os-name">Windows</span>
+            <span class="os-detail">x64 &middot; 75 MB</span>
+            <span class="os-cta">Download .exe <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+          </a>
+          <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-Linux-x86_64.AppImage">
+            <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.5 1.5c-1.6 0-2.9 1.7-2.9 3.8 0 1.1.3 2 .8 2.7-1.6 1-3.3 2.9-3.3 5.5 0 .5.1 1 .2 1.4-.9.4-1.7 1.2-1.9 2.3-.3 1.6.6 2.4 1.7 2.7.2 1 1 1.7 2.3 1.7.6 0 1.1-.2 1.6-.5.5.4 1.2.6 2 .6s1.5-.2 2-.6c.5.3 1 .5 1.6.5 1.3 0 2.1-.7 2.3-1.7 1.1-.3 2-1.1 1.7-2.7-.2-1.1-1-1.9-1.9-2.3.1-.4.2-.9.2-1.4 0-2.6-1.7-4.5-3.3-5.5.5-.7.8-1.6.8-2.7 0-2.1-1.3-3.8-2.9-3.8zm-1.7 8.9c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1zm3.4 0c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1z"/></svg>
+            <span class="os-name">Linux</span>
+            <span class="os-detail">x86_64 &middot; AppImage &middot; 102 MB</span>
+            <span class="os-cta">Download .AppImage <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+          </a>
+        </div>
+        <p class="other-arch">Need a different CPU architecture? All builds are listed on the <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0 release page</a>. Builds are unsigned &mdash; macOS and Windows will warn about an unidentified developer on first launch.</p>
+
+        <p class="stores-label">App stores</p>
+        <div class="plat-grid">
+          <div class="plat soon">
+            <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.416 2.06-1.25 2.83-.905.84-2.023 1.32-3.09 1.24-.13-1.1.42-2.24 1.24-3.02.86-.82 2.14-1.32 3.1-1.05zM20.62 17.1c-.52 1.2-.77 1.74-1.44 2.8-.93 1.48-2.24 3.32-3.87 3.34-1.44.02-1.81-.94-3.76-.93-1.95.01-2.36.95-3.8.93-1.63-.02-2.87-1.68-3.8-3.16-2.6-4.12-2.87-8.96-1.27-11.53 1.14-1.84 2.94-2.92 4.63-2.92 1.72 0 2.8 1 4.22 1 1.38 0 2.22-1 4.22-1 1.5 0 3.09.82 4.22 2.24-3.71 2.03-3.11 7.32.65 9.23z"/></svg>
+            <span class="os">macOS</span>
+            <span class="name">App Store</span>
+            <span class="state">Coming soon</span>
+          </div>
+          <div class="plat soon">
+            <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.4 4.5 10.4 11.3 3 11.3zM11.3 4.4 21 3v8.2h-9.7zM3 12.2 10.4 12.2 10.4 19.1 3 18zM11.3 12.2 21 12.2 21 21 11.3 19.6z"/></svg>
+            <span class="os">Windows</span>
+            <span class="name">Microsoft Store</span>
+            <span class="state">Coming soon</span>
+          </div>
+          <div class="plat soon">
+            <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.5 1.5c-1.6 0-2.9 1.7-2.9 3.8 0 1.1.3 2 .8 2.7-1.6 1-3.3 2.9-3.3 5.5 0 .5.1 1 .2 1.4-.9.4-1.7 1.2-1.9 2.3-.3 1.6.6 2.4 1.7 2.7.2 1 1 1.7 2.3 1.7.6 0 1.1-.2 1.6-.5.5.4 1.2.6 2 .6s1.5-.2 2-.6c.5.3 1 .5 1.6.5 1.3 0 2.1-.7 2.3-1.7 1.1-.3 2-1.1 1.7-2.7-.2-1.1-1-1.9-1.9-2.3.1-.4.2-.9.2-1.4 0-2.6-1.7-4.5-3.3-5.5.5-.7.8-1.6.8-2.7 0-2.1-1.3-3.8-2.9-3.8zm-1.7 8.9c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1zm3.4 0c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1z"/></svg>
+            <span class="os">Linux</span>
+            <span class="name">.deb &amp; .rpm</span>
+            <span class="state">Coming soon</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="wrap contact-row">
+        <div class="contact-copy">
+          <h2>Found a bug? Got an idea?</h2>
+          <p>Open an issue on GitHub, or email it straight to the person who built this.</p>
+        </div>
+        <a class="btn btn-ghost btn-mail" href="mailto:richard.bagriy@gmail.com?subject=PowerDown">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6 9 7 9-7"/></svg>
+          richard.bagriy@gmail.com
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-inner">
+      <div class="brand">
+        <img src="icon.png" alt="" style="width:22px;height:22px;border-radius:6px;" />
+        <b>PowerDown</b>
+      </div>
+      <p>Free &amp; open source &middot; MIT</p>
+      <a href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">github.com/Richard-bahrii/PowerDown</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var el = document.getElementById('clock');
+      if (!el) return;
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var total = 44 * 60 + 59;
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function render(s) {
+        var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+        el.textContent = pad(h) + ':' + pad(m) + ':' + pad(sec);
+      }
+      render(total);
+      if (reduce) return;
+      setInterval(function () {
+        total = total > 0 ? total - 1 : 44 * 60 + 59;
+        render(total);
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>
