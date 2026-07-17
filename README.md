@@ -1,5 +1,7 @@
 # PowerDown
 
+**[powerdown.app](https://powerdown.app)**
+
 A small, cross-platform Electron app that shuts your computer down on a timer or at a scheduled date and time.
 
 - **In…** — set hours/minutes (or tap 15 min / 30 min / 1 h / 2 h) and the computer shuts down after that time.
@@ -40,6 +42,10 @@ Works on **Windows, macOS, and Linux** — the app picks the right shutdown comm
 - **Locale-aware clock** — the scheduled time uses 12-hour AM/PM or 24-hour, per locale.
 - **Launch at system startup** — optional, toggled in the app.
 - **Tray + live countdown** — closing the window keeps the shutdown pending; cancel any time.
+
+## Download
+
+Pre-built installers for Windows, macOS, and Linux are on **[powerdown.app](https://powerdown.app)** or directly on the [releases page](https://github.com/Richard-bahrii/PowerDown/releases/latest). Builds are unsigned — macOS and Windows will warn about an unidentified developer on first launch.
 
 ## Run in development
 
