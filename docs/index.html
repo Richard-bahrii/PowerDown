@@ -72,6 +72,33 @@
     }
     .bar a.ghost:hover { border-color: var(--accent); background: var(--surface); }
 
+    .bar-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ---- language dropdown ---- */
+    .lang-select { position: relative; }
+    .lang-trigger {
+      display: flex; align-items: center; gap: 8px;
+      font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text);
+      background: transparent; border: 1px solid var(--border); border-radius: 9px;
+      padding: 7px 10px; cursor: pointer;
+    }
+    .lang-trigger:hover, .lang-select.open .lang-trigger { border-color: var(--accent); background: var(--surface); }
+    .lang-trigger .caret { color: var(--muted); font-size: 10px; }
+    .flag { width: 18px; height: 13px; border-radius: 2px; object-fit: cover; display: block; flex: none; }
+    .lang-menu {
+      position: absolute; top: calc(100% + 6px); right: 0; margin: 0; padding: 4px;
+      list-style: none; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: 0 12px 28px rgba(0,0,0,.5); z-index: 30;
+      min-width: 160px; display: none;
+    }
+    .lang-select.open .lang-menu { display: block; }
+    .lang-menu li {
+      display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px;
+      font-size: 13.5px; color: var(--text); cursor: pointer;
+    }
+    .lang-menu li:hover { background: var(--surface-2); }
+    .lang-menu li.selected { background: var(--accent); color: #17170e; font-weight: 700; }
+
     /* ---- hero ---- */
     .hero { padding: 92px 0 72px; position: relative; }
     .glyph {
@@ -267,10 +294,26 @@
         <img src="icon.png" alt="PowerDown icon" />
         <b>PowerDown</b>
       </div>
-      <a class="ghost" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-      </a>
+      <div class="bar-actions">
+        <div class="lang-select" id="lang-select">
+          <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <img class="flag" id="lang-current-flag" alt="" />
+            <span id="lang-current-name"></span>
+            <span class="caret" aria-hidden="true">&#9662;</span>
+          </button>
+          <ul class="lang-menu" id="lang-menu" role="listbox">
+            <li role="option" data-lang="en"><img class="flag" src="flags/us.svg" alt="" /><span>English</span></li>
+            <li role="option" data-lang="uk"><img class="flag" src="flags/ua.svg" alt="" /><span>Українська</span></li>
+            <li role="option" data-lang="es"><img class="flag" src="flags/es.svg" alt="" /><span>Español</span></li>
+            <li role="option" data-lang="fr"><img class="flag" src="flags/fr.svg" alt="" /><span>Français</span></li>
+            <li role="option" data-lang="de"><img class="flag" src="flags/de.svg" alt="" /><span>Deutsch</span></li>
+          </ul>
+        </div>
+        <a class="ghost" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+      </div>
     </div>
   </header>
 
@@ -281,45 +324,45 @@
         <line x1="50" y1="12" x2="50" y2="50" />
       </svg>
       <div class="wrap">
-        <p class="eyebrow">Timer &amp; scheduler &middot; Windows &middot; macOS &middot; Linux</p>
-        <h1>Schedule the <span class="off">dark</span>.</h1>
-        <p class="lede">PowerDown turns your computer off on a countdown or at an exact date and time. Set it, close the window, and get on with your night &mdash; it waits in the tray and shuts down on cue.</p>
+        <p class="eyebrow" data-i18n="eyebrow">Timer &amp; scheduler &middot; Windows &middot; macOS &middot; Linux</p>
+        <h1 data-i18n-html="heroTitle">Schedule the <span class="off">dark</span>.</h1>
+        <p class="lede" data-i18n="lede">PowerDown turns your computer off on a countdown or at an exact date and time. Set it, close the window, and get on with your night &mdash; it waits in the tray and shuts down on cue.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">Get it on GitHub</a>
-          <a class="btn btn-ghost" href="#download">See all platforms</a>
-          <span class="cta-note">// free &amp; open source</span>
+          <a class="btn btn-primary" href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener" data-i18n="ctaPrimary">Get it on GitHub</a>
+          <a class="btn btn-ghost" href="#download" data-i18n="ctaGhost">See all platforms</a>
+          <span class="cta-note" data-i18n="ctaNote">// free &amp; open source</span>
         </div>
 
         <figure class="clock-card">
-          <div class="clock-label">The computer will shut down</div>
-          <div class="clock-target">tonight &middot; 11:30 PM</div>
+          <div class="clock-label" data-i18n="clockLabel">The computer will shut down</div>
+          <div class="clock-target" data-i18n="clockTarget">tonight &middot; 11:30 PM</div>
           <div id="clock">00:44:59</div>
-          <div class="clock-foot"><span class="pseudo-cancel">Cancel</span></div>
+          <div class="clock-foot"><span class="pseudo-cancel" data-i18n="cancel">Cancel</span></div>
         </figure>
       </div>
     </div>
 
     <section id="shots">
       <div class="wrap">
-        <p class="sec-eyebrow">A look inside</p>
-        <h2>Small window, everything at hand.</h2>
-        <p class="sec-lede">One compact window, two ways to schedule, five languages. The window sizes itself to what's on screen &mdash; and grows only while the calendar is open.</p>
+        <p class="sec-eyebrow" data-i18n="shotsEyebrow">A look inside</p>
+        <h2 data-i18n="shotsH2">Small window, everything at hand.</h2>
+        <p class="sec-lede" data-i18n="shotsLede">One compact window, two ways to schedule, five languages. The window sizes itself to what's on screen &mdash; and grows only while the calendar is open.</p>
         <div class="shots">
           <figure class="shot">
             <img src="screenshots/1-timer.png" width="840" height="912" loading="lazy" alt="Countdown timer tab" />
-            <figcaption><b>Countdown timer</b> &mdash; hours &amp; minutes, or one tap</figcaption>
+            <figcaption data-i18n-html="shot1"><b>Countdown timer</b> &mdash; hours &amp; minutes, or one tap</figcaption>
           </figure>
           <figure class="shot">
             <img src="screenshots/3-schedule.png" width="840" height="1120" loading="lazy" alt="Scheduler with calendar open" />
-            <figcaption><b>Scheduler</b> &mdash; a date, a time, 12h or 24h by locale</figcaption>
+            <figcaption data-i18n-html="shot2"><b>Scheduler</b> &mdash; a date, a time, 12h or 24h by locale</figcaption>
           </figure>
           <figure class="shot">
             <img src="screenshots/2-languages.png" width="840" height="912" loading="lazy" alt="Language dropdown with flags" />
-            <figcaption><b>Five languages</b> &mdash; with flags, follows your OS</figcaption>
+            <figcaption data-i18n-html="shot3"><b>Five languages</b> &mdash; with flags, follows your OS</figcaption>
           </figure>
           <figure class="shot">
             <img src="screenshots/4-countdown.png" width="840" height="780" loading="lazy" alt="Live countdown" />
-            <figcaption><b>Live countdown</b> &mdash; cancel any time before it fires</figcaption>
+            <figcaption data-i18n-html="shot4"><b>Live countdown</b> &mdash; cancel any time before it fires</figcaption>
           </figure>
         </div>
       </div>
@@ -327,39 +370,39 @@
 
     <section id="features">
       <div class="wrap">
-        <p class="sec-eyebrow">What's inside</p>
-        <h2>Built to be boring in the best way.</h2>
-        <p class="sec-lede">It does one job and does it precisely, on every desktop OS, in your language.</p>
+        <p class="sec-eyebrow" data-i18n="featuresEyebrow">What's inside</p>
+        <h2 data-i18n="featuresH2">Built to be boring in the best way.</h2>
+        <p class="sec-lede" data-i18n="featuresLede">It does one job and does it precisely, on every desktop OS, in your language.</p>
         <div class="feat-grid">
           <div class="feat">
-            <div class="k">Two modes</div>
-            <h3>Timer or calendar</h3>
-            <p>Count down from now, or pick an exact date and time to power off.</p>
+            <div class="k" data-i18n="feat1k">Two modes</div>
+            <h3 data-i18n="feat1h">Timer or calendar</h3>
+            <p data-i18n="feat1p">Count down from now, or pick an exact date and time to power off.</p>
           </div>
           <div class="feat">
-            <div class="k">Cross-platform</div>
-            <h3>Win &middot; macOS &middot; Linux</h3>
-            <p>Picks the right native shutdown command for whatever you're running.</p>
+            <div class="k" data-i18n="feat2k">Cross-platform</div>
+            <h3 data-i18n="feat2h">Win &middot; macOS &middot; Linux</h3>
+            <p data-i18n="feat2p">Picks the right native shutdown command for whatever you're running.</p>
           </div>
           <div class="feat">
-            <div class="k">Localized</div>
-            <h3>Five languages</h3>
-            <p>English, Ukrainian, Spanish, French, German &mdash; with flags, matching your system on first run.</p>
+            <div class="k" data-i18n="feat3k">Localized</div>
+            <h3 data-i18n="feat3h">Five languages</h3>
+            <p data-i18n="feat3p">English, Ukrainian, Spanish, French, German &mdash; with flags, matching your system on first run.</p>
           </div>
           <div class="feat">
-            <div class="k">Locale clock</div>
-            <h3>12h or 24h</h3>
-            <p>The scheduled time shows AM/PM or 24-hour, whichever your region uses.</p>
+            <div class="k" data-i18n="feat4k">Locale clock</div>
+            <h3 data-i18n="feat4h">12h or 24h</h3>
+            <p data-i18n="feat4p">The scheduled time shows AM/PM or 24-hour, whichever your region uses.</p>
           </div>
           <div class="feat">
-            <div class="k">Set &amp; forget</div>
-            <h3>Runs in the tray</h3>
-            <p>Close the window and the shutdown still fires. A live countdown, cancellable any time.</p>
+            <div class="k" data-i18n="feat5k">Set &amp; forget</div>
+            <h3 data-i18n="feat5h">Runs in the tray</h3>
+            <p data-i18n="feat5p">Close the window and the shutdown still fires. A live countdown, cancellable any time.</p>
           </div>
           <div class="feat">
-            <div class="k">Optional</div>
-            <h3>Launch at startup</h3>
-            <p>Have PowerDown ready the moment you log in &mdash; one checkbox.</p>
+            <div class="k" data-i18n="feat6k">Optional</div>
+            <h3 data-i18n="feat6h">Launch at startup</h3>
+            <p data-i18n="feat6p">Have PowerDown ready the moment you log in &mdash; one checkbox.</p>
           </div>
         </div>
       </div>
@@ -368,53 +411,53 @@
     <section id="download">
       <div class="wrap">
         <div class="download-kicker">
-          <p class="sec-eyebrow">Get PowerDown</p>
+          <p class="sec-eyebrow" data-i18n="downloadEyebrow">Get PowerDown</p>
           <span class="version-pill">v1.0.0</span>
         </div>
-        <h2>Download it directly &mdash; no store required.</h2>
-        <p class="sec-lede">While store listings are pending, install straight from a GitHub Release. Free, open source, one file per platform.</p>
+        <h2 data-i18n="downloadH2">Download it directly &mdash; no store required.</h2>
+        <p class="sec-lede" data-i18n="downloadLede">While store listings are pending, install straight from a GitHub Release. Free, open source, one file per platform.</p>
 
         <div class="direct-grid">
           <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-macOS.dmg">
             <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.416 2.06-1.25 2.83-.905.84-2.023 1.32-3.09 1.24-.13-1.1.42-2.24 1.24-3.02.86-.82 2.14-1.32 3.1-1.05zM20.62 17.1c-.52 1.2-.77 1.74-1.44 2.8-.93 1.48-2.24 3.32-3.87 3.34-1.44.02-1.81-.94-3.76-.93-1.95.01-2.36.95-3.8.93-1.63-.02-2.87-1.68-3.8-3.16-2.6-4.12-2.87-8.96-1.27-11.53 1.14-1.84 2.94-2.92 4.63-2.92 1.72 0 2.8 1 4.22 1 1.38 0 2.22-1 4.22-1 1.5 0 3.09.82 4.22 2.24-3.71 2.03-3.11 7.32.65 9.23z"/></svg>
             <span class="os-name">macOS</span>
-            <span class="os-detail">Universal &middot; Apple Silicon &amp; Intel &middot; 168 MB</span>
-            <span class="os-cta">Download .dmg <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+            <span class="os-detail" data-i18n="macDetail">Universal &middot; Apple Silicon &amp; Intel &middot; 168 MB</span>
+            <span class="os-cta"><span data-i18n="macCta">Download .dmg</span> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
           </a>
           <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-Windows-Setup.exe">
             <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.4 4.5 10.4 11.3 3 11.3zM11.3 4.4 21 3v8.2h-9.7zM3 12.2 10.4 12.2 10.4 19.1 3 18zM11.3 12.2 21 12.2 21 21 11.3 19.6z"/></svg>
             <span class="os-name">Windows</span>
             <span class="os-detail">x64 &middot; 75 MB</span>
-            <span class="os-cta">Download .exe <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+            <span class="os-cta"><span data-i18n="winCta">Download .exe</span> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
           </a>
           <a class="direct-card" href="https://github.com/Richard-bahrii/PowerDown/releases/download/v1.0.0/PowerDown-1.0.0-Linux-x86_64.AppImage">
             <svg class="os-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.5 1.5c-1.6 0-2.9 1.7-2.9 3.8 0 1.1.3 2 .8 2.7-1.6 1-3.3 2.9-3.3 5.5 0 .5.1 1 .2 1.4-.9.4-1.7 1.2-1.9 2.3-.3 1.6.6 2.4 1.7 2.7.2 1 1 1.7 2.3 1.7.6 0 1.1-.2 1.6-.5.5.4 1.2.6 2 .6s1.5-.2 2-.6c.5.3 1 .5 1.6.5 1.3 0 2.1-.7 2.3-1.7 1.1-.3 2-1.1 1.7-2.7-.2-1.1-1-1.9-1.9-2.3.1-.4.2-.9.2-1.4 0-2.6-1.7-4.5-3.3-5.5.5-.7.8-1.6.8-2.7 0-2.1-1.3-3.8-2.9-3.8zm-1.7 8.9c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1zm3.4 0c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1z"/></svg>
             <span class="os-name">Linux</span>
-            <span class="os-detail">x86_64 &middot; AppImage &middot; 102 MB</span>
-            <span class="os-cta">Download .AppImage <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+            <span class="os-detail" data-i18n="linuxDetail">x86_64 &middot; AppImage &middot; 102 MB</span>
+            <span class="os-cta"><span data-i18n="linuxCta">Download .AppImage</span> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
           </a>
         </div>
-        <p class="other-arch">Need a different CPU architecture? All builds are listed on the <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0 release page</a>. Builds are unsigned &mdash; macOS and Windows will warn about an unidentified developer on first launch.</p>
+        <p class="other-arch" data-i18n-html="otherArch">Need a different CPU architecture? All builds are listed on the <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0 release page</a>. Builds are unsigned &mdash; macOS and Windows will warn about an unidentified developer on first launch.</p>
 
-        <p class="stores-label">App stores</p>
+        <p class="stores-label" data-i18n="storesLabel">App stores</p>
         <div class="plat-grid">
           <div class="plat soon">
             <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.416 2.06-1.25 2.83-.905.84-2.023 1.32-3.09 1.24-.13-1.1.42-2.24 1.24-3.02.86-.82 2.14-1.32 3.1-1.05zM20.62 17.1c-.52 1.2-.77 1.74-1.44 2.8-.93 1.48-2.24 3.32-3.87 3.34-1.44.02-1.81-.94-3.76-.93-1.95.01-2.36.95-3.8.93-1.63-.02-2.87-1.68-3.8-3.16-2.6-4.12-2.87-8.96-1.27-11.53 1.14-1.84 2.94-2.92 4.63-2.92 1.72 0 2.8 1 4.22 1 1.38 0 2.22-1 4.22-1 1.5 0 3.09.82 4.22 2.24-3.71 2.03-3.11 7.32.65 9.23z"/></svg>
             <span class="os">macOS</span>
-            <span class="name">App Store</span>
-            <span class="state">Coming soon</span>
+            <span class="name" data-i18n="storeMacName">App Store</span>
+            <span class="state" data-i18n="comingSoon">Coming soon</span>
           </div>
           <div class="plat soon">
             <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.4 4.5 10.4 11.3 3 11.3zM11.3 4.4 21 3v8.2h-9.7zM3 12.2 10.4 12.2 10.4 19.1 3 18zM11.3 12.2 21 12.2 21 21 11.3 19.6z"/></svg>
             <span class="os">Windows</span>
-            <span class="name">Microsoft Store</span>
-            <span class="state">Coming soon</span>
+            <span class="name" data-i18n="storeWinName">Microsoft Store</span>
+            <span class="state" data-i18n="comingSoon">Coming soon</span>
           </div>
           <div class="plat soon">
             <svg class="plat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.5 1.5c-1.6 0-2.9 1.7-2.9 3.8 0 1.1.3 2 .8 2.7-1.6 1-3.3 2.9-3.3 5.5 0 .5.1 1 .2 1.4-.9.4-1.7 1.2-1.9 2.3-.3 1.6.6 2.4 1.7 2.7.2 1 1 1.7 2.3 1.7.6 0 1.1-.2 1.6-.5.5.4 1.2.6 2 .6s1.5-.2 2-.6c.5.3 1 .5 1.6.5 1.3 0 2.1-.7 2.3-1.7 1.1-.3 2-1.1 1.7-2.7-.2-1.1-1-1.9-1.9-2.3.1-.4.2-.9.2-1.4 0-2.6-1.7-4.5-3.3-5.5.5-.7.8-1.6.8-2.7 0-2.1-1.3-3.8-2.9-3.8zm-1.7 8.9c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1zm3.4 0c.4 0 .8.4.8 1s-.4 1-.8 1-.8-.4-.8-1 .4-1 .8-1z"/></svg>
             <span class="os">Linux</span>
-            <span class="name">.deb &amp; .rpm</span>
-            <span class="state">Coming soon</span>
+            <span class="name" data-i18n="storeLinuxName">.deb &amp; .rpm</span>
+            <span class="state" data-i18n="comingSoon">Coming soon</span>
           </div>
         </div>
       </div>
@@ -423,8 +466,8 @@
     <section id="contact">
       <div class="wrap contact-row">
         <div class="contact-copy">
-          <h2>Found a bug? Got an idea?</h2>
-          <p>Open an issue on GitHub, or email it straight to the person who built this.</p>
+          <h2 data-i18n="contactH2">Found a bug? Got an idea?</h2>
+          <p data-i18n="contactP">Open an issue on GitHub, or email it straight to the person who built this.</p>
         </div>
         <a class="btn btn-ghost btn-mail" href="mailto:richard.bagriy@gmail.com?subject=PowerDown">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6 9 7 9-7"/></svg>
@@ -440,7 +483,7 @@
         <img src="icon.png" alt="" style="width:22px;height:22px;border-radius:6px;" />
         <b>PowerDown</b>
       </div>
-      <p>Free &amp; open source &middot; MIT</p>
+      <p data-i18n="footerLicense">Free &amp; open source &middot; MIT</p>
       <a href="https://github.com/Richard-bahrii/PowerDown" target="_blank" rel="noopener">github.com/Richard-bahrii/PowerDown</a>
     </div>
   </footer>
@@ -462,6 +505,319 @@
         total = total > 0 ? total - 1 : 44 * 60 + 59;
         render(total);
       }, 1000);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var LOCALES = {
+        en: {
+          name: 'English',
+          eyebrow: `Timer & scheduler · Windows · macOS · Linux`,
+          heroTitle: `Schedule the <span class="off">dark</span>.`,
+          lede: `PowerDown turns your computer off on a countdown or at an exact date and time. Set it, close the window, and get on with your night — it waits in the tray and shuts down on cue.`,
+          ctaPrimary: `Get it on GitHub`,
+          ctaGhost: `See all platforms`,
+          ctaNote: `// free & open source`,
+          clockLabel: `The computer will shut down`,
+          clockTarget: `tonight · 11:30 PM`,
+          cancel: `Cancel`,
+          shotsEyebrow: `A look inside`,
+          shotsH2: `Small window, everything at hand.`,
+          shotsLede: `One compact window, two ways to schedule, five languages. The window sizes itself to what's on screen — and grows only while the calendar is open.`,
+          shot1: `<b>Countdown timer</b> — hours & minutes, or one tap`,
+          shot2: `<b>Scheduler</b> — a date, a time, 12h or 24h by locale`,
+          shot3: `<b>Five languages</b> — with flags, follows your OS`,
+          shot4: `<b>Live countdown</b> — cancel any time before it fires`,
+          featuresEyebrow: `What's inside`,
+          featuresH2: `Built to be boring in the best way.`,
+          featuresLede: `It does one job and does it precisely, on every desktop OS, in your language.`,
+          feat1k: `Two modes`, feat1h: `Timer or calendar`, feat1p: `Count down from now, or pick an exact date and time to power off.`,
+          feat2k: `Cross-platform`, feat2h: `Win · macOS · Linux`, feat2p: `Picks the right native shutdown command for whatever you're running.`,
+          feat3k: `Localized`, feat3h: `Five languages`, feat3p: `English, Ukrainian, Spanish, French, German — with flags, matching your system on first run.`,
+          feat4k: `Locale clock`, feat4h: `12h or 24h`, feat4p: `The scheduled time shows AM/PM or 24-hour, whichever your region uses.`,
+          feat5k: `Set & forget`, feat5h: `Runs in the tray`, feat5p: `Close the window and the shutdown still fires. A live countdown, cancellable any time.`,
+          feat6k: `Optional`, feat6h: `Launch at startup`, feat6p: `Have PowerDown ready the moment you log in — one checkbox.`,
+          downloadEyebrow: `Get PowerDown`,
+          downloadH2: `Download it directly — no store required.`,
+          downloadLede: `While store listings are pending, install straight from a GitHub Release. Free, open source, one file per platform.`,
+          macDetail: `Universal · Apple Silicon & Intel · 168 MB`,
+          macCta: `Download .dmg`,
+          winCta: `Download .exe`,
+          linuxDetail: `x86_64 · AppImage · 102 MB`,
+          linuxCta: `Download .AppImage`,
+          otherArch: `Need a different CPU architecture? All builds are listed on the <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0 release page</a>. Builds are unsigned — macOS and Windows will warn about an unidentified developer on first launch.`,
+          storesLabel: `App stores`,
+          storeMacName: `App Store`,
+          storeWinName: `Microsoft Store`,
+          storeLinuxName: `.deb & .rpm`,
+          comingSoon: `Coming soon`,
+          contactH2: `Found a bug? Got an idea?`,
+          contactP: `Open an issue on GitHub, or email it straight to the person who built this.`,
+          footerLicense: `Free & open source · MIT`,
+          title: `PowerDown — schedule the dark`,
+        },
+        uk: {
+          name: `Українська`,
+          eyebrow: `Таймер і розклад · Windows · macOS · Linux`,
+          heroTitle: `Заплануй <span class="off">вимкнення</span>.`,
+          lede: `PowerDown вимикає компʼютер за таймером або в точно вказаний час. Постав — і закривай вікно: застосунок чекає в треї й вимкне компʼютер сам.`,
+          ctaPrimary: `Забрати на GitHub`,
+          ctaGhost: `Усі платформи`,
+          ctaNote: `// безкоштовно й з відкритим кодом`,
+          clockLabel: `Компʼютер вимкнеться`,
+          clockTarget: `сьогодні · 23:30`,
+          cancel: `Скасувати`,
+          shotsEyebrow: `Погляд усередину`,
+          shotsH2: `Маленьке вікно, все під рукою.`,
+          shotsLede: `Одне компактне вікно, два способи запланувати, пʼять мов. Вікно саме підлаштовується під вміст — і збільшується лише поки відкритий календар.`,
+          shot1: `<b>Таймер</b> — години й хвилини, або один клік`,
+          shot2: `<b>Розклад</b> — дата, час, 12 чи 24 години залежно від локалі`,
+          shot3: `<b>Пʼять мов</b> — із прапорцями, підхоплює мову ОС`,
+          shot4: `<b>Живий відлік</b> — скасуй у будь-який момент`,
+          featuresEyebrow: `Що всередині`,
+          featuresH2: `Зроблено нудно — і це найкраще, що можна зробити.`,
+          featuresLede: `Робить одну справу і робить її точно, на кожній десктопній ОС, твоєю мовою.`,
+          feat1k: `Два режими`, feat1h: `Таймер або календар`, feat1p: `Відлік від зараз або точна дата й час вимкнення.`,
+          feat2k: `Кросплатформність`, feat2h: `Win · macOS · Linux`, feat2p: `Сам обирає правильну команду вимкнення для твоєї системи.`,
+          feat3k: `Локалізація`, feat3h: `Пʼять мов`, feat3p: `Англійська, українська, іспанська, французька, німецька — з прапорцями, підхоплює мову системи при першому запуску.`,
+          feat4k: `Формат часу`, feat4h: `12 або 24 години`, feat4p: `Запланований час показується як AM/PM або 24-годинний формат — залежно від регіону.`,
+          feat5k: `Постав і забудь`, feat5h: `Працює в треї`, feat5p: `Закрий вікно — вимкнення все одно спрацює. Живий відлік, скасувати можна будь-коли.`,
+          feat6k: `За бажанням`, feat6h: `Автозапуск`, feat6p: `PowerDown готовий одразу після входу в систему — одна галочка.`,
+          downloadEyebrow: `Забрати PowerDown`,
+          downloadH2: `Завантаж напряму — без магазину додатків.`,
+          downloadLede: `Поки лістинги в магазинах на розгляді, встанови прямо з GitHub Release. Безкоштовно, з відкритим кодом, один файл на платформу.`,
+          macDetail: `Універсальний · Apple Silicon і Intel · 168 МБ`,
+          macCta: `Завантажити .dmg`,
+          winCta: `Завантажити .exe`,
+          linuxDetail: `x86_64 · AppImage · 102 МБ`,
+          linuxCta: `Завантажити .AppImage`,
+          otherArch: `Потрібна інша архітектура процесора? Усі збірки — на <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">сторінці релізу v1.0.0</a>. Збірки без підпису — macOS і Windows попередять про невідомого розробника при першому запуску.`,
+          storesLabel: `Магазини додатків`,
+          storeMacName: `App Store`,
+          storeWinName: `Microsoft Store`,
+          storeLinuxName: `.deb і .rpm`,
+          comingSoon: `Скоро`,
+          contactH2: `Знайшли баг? Є ідея?`,
+          contactP: `Створи issue на GitHub або напиши напряму автору.`,
+          footerLicense: `Безкоштовно, з відкритим кодом · MIT`,
+          title: `PowerDown — заплануй вимкнення`,
+        },
+        es: {
+          name: `Español`,
+          eyebrow: `Temporizador y programador · Windows · macOS · Linux`,
+          heroTitle: `Programa el <span class="off">apagado</span>.`,
+          lede: `PowerDown apaga tu ordenador con una cuenta atrás o en una fecha y hora exactas. Configúralo, cierra la ventana y sigue con tu noche: espera en la bandeja y se apaga en el momento indicado.`,
+          ctaPrimary: `Consíguelo en GitHub`,
+          ctaGhost: `Ver todas las plataformas`,
+          ctaNote: `// gratis y de código abierto`,
+          clockLabel: `El ordenador se apagará`,
+          clockTarget: `esta noche · 23:30`,
+          cancel: `Cancelar`,
+          shotsEyebrow: `Un vistazo por dentro`,
+          shotsH2: `Ventana pequeña, todo a mano.`,
+          shotsLede: `Una ventana compacta, dos formas de programar, cinco idiomas. La ventana se ajusta a lo que hay en pantalla, y solo crece mientras el calendario está abierto.`,
+          shot1: `<b>Temporizador</b> — horas y minutos, o un toque`,
+          shot2: `<b>Programador</b> — una fecha, una hora, 12 o 24 horas según el idioma`,
+          shot3: `<b>Cinco idiomas</b> — con banderas, sigue tu sistema`,
+          shot4: `<b>Cuenta atrás en vivo</b> — cancela en cualquier momento`,
+          featuresEyebrow: `Qué incluye`,
+          featuresH2: `Hecho para ser aburrido, de la mejor manera.`,
+          featuresLede: `Hace un solo trabajo y lo hace con precisión, en cada sistema de escritorio, en tu idioma.`,
+          feat1k: `Dos modos`, feat1h: `Temporizador o calendario`, feat1p: `Cuenta atrás desde ahora, o elige una fecha y hora exactas para apagar.`,
+          feat2k: `Multiplataforma`, feat2h: `Win · macOS · Linux`, feat2p: `Elige el comando de apagado nativo correcto para tu sistema.`,
+          feat3k: `Localizado`, feat3h: `Cinco idiomas`, feat3p: `Inglés, ucraniano, español, francés, alemán — con banderas, coincide con tu sistema en el primer arranque.`,
+          feat4k: `Reloj según el idioma`, feat4h: `12 o 24 horas`, feat4p: `La hora programada se muestra en AM/PM o en formato de 24 horas, según tu región.`,
+          feat5k: `Configúralo y olvídalo`, feat5h: `Funciona en la bandeja`, feat5p: `Cierra la ventana y el apagado se ejecuta igual. Cuenta atrás en vivo, cancelable en cualquier momento.`,
+          feat6k: `Opcional`, feat6h: `Inicio automático`, feat6p: `Ten PowerDown listo justo al iniciar sesión — una casilla.`,
+          downloadEyebrow: `Consigue PowerDown`,
+          downloadH2: `Descárgalo directamente — sin tienda de aplicaciones.`,
+          downloadLede: `Mientras las tiendas están pendientes, instálalo directamente desde un GitHub Release. Gratis, de código abierto, un archivo por plataforma.`,
+          macDetail: `Universal · Apple Silicon e Intel · 168 MB`,
+          macCta: `Descargar .dmg`,
+          winCta: `Descargar .exe`,
+          linuxDetail: `x86_64 · AppImage · 102 MB`,
+          linuxCta: `Descargar .AppImage`,
+          otherArch: `¿Necesitas otra arquitectura de CPU? Todas las compilaciones están en la <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">página de la versión v1.0.0</a>. Compilaciones sin firmar: macOS y Windows avisarán de un desarrollador no identificado al abrir por primera vez.`,
+          storesLabel: `Tiendas de aplicaciones`,
+          storeMacName: `App Store`,
+          storeWinName: `Microsoft Store`,
+          storeLinuxName: `.deb y .rpm`,
+          comingSoon: `Próximamente`,
+          contactH2: `¿Encontraste un error? ¿Tienes una idea?`,
+          contactP: `Abre un issue en GitHub, o escribe directamente a quien lo hizo.`,
+          footerLicense: `Gratis y de código abierto · MIT`,
+          title: `PowerDown — programa el apagado`,
+        },
+        fr: {
+          name: `Français`,
+          eyebrow: `Minuteur et planificateur · Windows · macOS · Linux`,
+          heroTitle: `Programmez l'<span class="off">extinction</span>.`,
+          lede: `PowerDown éteint votre ordinateur avec un compte à rebours ou à une date et une heure précises. Réglez-le, fermez la fenêtre, et poursuivez votre soirée — il attend dans la zone de notification et s'éteint au bon moment.`,
+          ctaPrimary: `L'obtenir sur GitHub`,
+          ctaGhost: `Voir toutes les plateformes`,
+          ctaNote: `// gratuit et open source`,
+          clockLabel: `L'ordinateur va s'éteindre`,
+          clockTarget: `ce soir · 23:30`,
+          cancel: `Annuler`,
+          shotsEyebrow: `Un aperçu`,
+          shotsH2: `Petite fenêtre, tout sous la main.`,
+          shotsLede: `Une fenêtre compacte, deux façons de programmer, cinq langues. La fenêtre s'ajuste à ce qui est affiché — et ne s'agrandit que le temps que le calendrier est ouvert.`,
+          shot1: `<b>Minuteur</b> — heures et minutes, ou un seul tap`,
+          shot2: `<b>Planificateur</b> — une date, une heure, 12h ou 24h selon la langue`,
+          shot3: `<b>Cinq langues</b> — avec drapeaux, suit votre système`,
+          shot4: `<b>Compte à rebours en direct</b> — annulez à tout moment`,
+          featuresEyebrow: `Ce qu'il y a dedans`,
+          featuresH2: `Conçu pour être ennuyeux, dans le bon sens du terme.`,
+          featuresLede: `Il fait une seule chose, et la fait précisément, sur chaque OS de bureau, dans votre langue.`,
+          feat1k: `Deux modes`, feat1h: `Minuteur ou calendrier`, feat1p: `Compte à rebours depuis maintenant, ou choisissez une date et une heure précises pour l'extinction.`,
+          feat2k: `Multiplateforme`, feat2h: `Win · macOS · Linux`, feat2p: `Choisit la bonne commande d'extinction native pour votre système.`,
+          feat3k: `Localisé`, feat3h: `Cinq langues`, feat3p: `Anglais, ukrainien, espagnol, français, allemand — avec drapeaux, correspond à votre système au premier lancement.`,
+          feat4k: `Horloge locale`, feat4h: `12h ou 24h`, feat4p: `L'heure programmée s'affiche en AM/PM ou en 24h, selon votre région.`,
+          feat5k: `Configurez et oubliez`, feat5h: `Fonctionne dans la zone de notification`, feat5p: `Fermez la fenêtre, l'extinction se déclenche quand même. Compte à rebours en direct, annulable à tout moment.`,
+          feat6k: `Optionnel`, feat6h: `Lancement au démarrage`, feat6p: `PowerDown prêt dès la connexion — une seule case à cocher.`,
+          downloadEyebrow: `Obtenir PowerDown`,
+          downloadH2: `Téléchargez-le directement — sans store.`,
+          downloadLede: `En attendant les stores, installez directement depuis une GitHub Release. Gratuit, open source, un fichier par plateforme.`,
+          macDetail: `Universel · Apple Silicon et Intel · 168 Mo`,
+          macCta: `Télécharger le .dmg`,
+          winCta: `Télécharger le .exe`,
+          linuxDetail: `x86_64 · AppImage · 102 Mo`,
+          linuxCta: `Télécharger l'.AppImage`,
+          otherArch: `Besoin d'une autre architecture de processeur ? Toutes les versions sont listées sur la <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">page de la version v1.0.0</a>. Versions non signées — macOS et Windows afficheront un avertissement de développeur non identifié au premier lancement.`,
+          storesLabel: `Stores d'applications`,
+          storeMacName: `App Store`,
+          storeWinName: `Microsoft Store`,
+          storeLinuxName: `.deb et .rpm`,
+          comingSoon: `Bientôt disponible`,
+          contactH2: `Un bug ? Une idée ?`,
+          contactP: `Ouvrez une issue sur GitHub, ou écrivez directement à la personne qui l'a créé.`,
+          footerLicense: `Gratuit et open source · MIT`,
+          title: `PowerDown — programmez l'extinction`,
+        },
+        de: {
+          name: `Deutsch`,
+          eyebrow: `Timer & Planer · Windows · macOS · Linux`,
+          heroTitle: `Planen Sie das <span class="off">Abschalten</span>.`,
+          lede: `PowerDown schaltet Ihren Computer per Countdown oder zu einem genauen Datum und einer genauen Uhrzeit aus. Einstellen, Fenster schließen, weitermachen — die App wartet in der Ablage und schaltet pünktlich ab.`,
+          ctaPrimary: `Auf GitHub holen`,
+          ctaGhost: `Alle Plattformen ansehen`,
+          ctaNote: `// kostenlos & Open Source`,
+          clockLabel: `Der Computer wird heruntergefahren`,
+          clockTarget: `heute Abend · 23:30`,
+          cancel: `Abbrechen`,
+          shotsEyebrow: `Ein Blick hinein`,
+          shotsH2: `Kleines Fenster, alles griffbereit.`,
+          shotsLede: `Ein kompaktes Fenster, zwei Wege zu planen, fünf Sprachen. Das Fenster passt sich dem Inhalt an — und wird nur größer, solange der Kalender geöffnet ist.`,
+          shot1: `<b>Countdown-Timer</b> — Stunden & Minuten, oder ein Klick`,
+          shot2: `<b>Planer</b> — Datum, Uhrzeit, 12 oder 24 Stunden je nach Sprache`,
+          shot3: `<b>Fünf Sprachen</b> — mit Flaggen, folgt Ihrem System`,
+          shot4: `<b>Live-Countdown</b> — jederzeit abbrechen`,
+          featuresEyebrow: `Was drinsteckt`,
+          featuresH2: `Bewusst unspektakulär gebaut.`,
+          featuresLede: `Erledigt eine Aufgabe und das präzise, auf jedem Desktop-Betriebssystem, in Ihrer Sprache.`,
+          feat1k: `Zwei Modi`, feat1h: `Timer oder Kalender`, feat1p: `Countdown ab jetzt, oder ein genaues Datum und eine Uhrzeit zum Abschalten wählen.`,
+          feat2k: `Plattformübergreifend`, feat2h: `Win · macOS · Linux`, feat2p: `Wählt den passenden nativen Befehl zum Herunterfahren für Ihr System.`,
+          feat3k: `Lokalisiert`, feat3h: `Fünf Sprachen`, feat3p: `Englisch, Ukrainisch, Spanisch, Französisch, Deutsch — mit Flaggen, folgt beim ersten Start Ihrem System.`,
+          feat4k: `Sprachabhängige Uhr`, feat4h: `12 oder 24 Stunden`, feat4p: `Die geplante Uhrzeit wird als AM/PM oder im 24-Stunden-Format angezeigt — je nach Region.`,
+          feat5k: `Einstellen & vergessen`, feat5h: `Läuft in der Ablage`, feat5p: `Fenster schließen, das Abschalten erfolgt trotzdem. Live-Countdown, jederzeit abbrechbar.`,
+          feat6k: `Optional`, feat6h: `Autostart`, feat6p: `PowerDown ist direkt nach der Anmeldung bereit — ein Häkchen genügt.`,
+          downloadEyebrow: `PowerDown holen`,
+          downloadH2: `Direkt herunterladen — kein Store nötig.`,
+          downloadLede: `Solange die Store-Einträge ausstehen, direkt aus einem GitHub Release installieren. Kostenlos, Open Source, eine Datei pro Plattform.`,
+          macDetail: `Universal · Apple Silicon & Intel · 168 MB`,
+          macCta: `.dmg herunterladen`,
+          winCta: `.exe herunterladen`,
+          linuxDetail: `x86_64 · AppImage · 102 MB`,
+          linuxCta: `.AppImage herunterladen`,
+          otherArch: `Andere CPU-Architektur benötigt? Alle Builds sind auf der <a href="https://github.com/Richard-bahrii/PowerDown/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0-Release-Seite</a> aufgelistet. Unsignierte Builds — macOS und Windows warnen beim ersten Start vor einem nicht identifizierten Entwickler.`,
+          storesLabel: `App Stores`,
+          storeMacName: `App Store`,
+          storeWinName: `Microsoft Store`,
+          storeLinuxName: `.deb & .rpm`,
+          comingSoon: `Demnächst`,
+          contactH2: `Bug gefunden? Eine Idee?`,
+          contactP: `Issue auf GitHub eröffnen, oder direkt an den Entwickler schreiben.`,
+          footerLicense: `Kostenlos & Open Source · MIT`,
+          title: `PowerDown — planen Sie das Abschalten`,
+        },
+      };
+
+      var DEFAULT_LANG = 'en';
+      var STORAGE_KEY = 'pd-site-lang';
+
+      function detectDefaultLang() {
+        var sys = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return LOCALES.hasOwnProperty(sys) ? sys : DEFAULT_LANG;
+      }
+
+      var saved = localStorage.getItem(STORAGE_KEY);
+      var currentLang = (saved && LOCALES.hasOwnProperty(saved)) ? saved : detectDefaultLang();
+
+      var langSelect = document.getElementById('lang-select');
+      var langTrigger = document.getElementById('lang-trigger');
+      var langMenu = document.getElementById('lang-menu');
+      var langCurrentFlag = document.getElementById('lang-current-flag');
+      var langCurrentName = document.getElementById('lang-current-name');
+      var langOptions = Array.prototype.slice.call(langMenu.querySelectorAll('[data-lang]'));
+
+      function apply(lang) {
+        var t = LOCALES[lang];
+        document.documentElement.lang = lang;
+        document.title = t.title;
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          if (t[key] !== undefined) el.textContent = t[key];
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n-html');
+          if (t[key] !== undefined) el.innerHTML = t[key];
+        });
+      }
+
+      function updateTrigger(lang) {
+        var option = langOptions.filter(function (li) { return li.getAttribute('data-lang') === lang; })[0] || langOptions[0];
+        langCurrentFlag.src = option.querySelector('.flag').getAttribute('src');
+        langCurrentName.textContent = option.querySelector('span').textContent;
+        langOptions.forEach(function (li) { li.classList.toggle('selected', li === option); });
+      }
+
+      function setLanguage(lang) {
+        currentLang = LOCALES.hasOwnProperty(lang) ? lang : DEFAULT_LANG;
+        localStorage.setItem(STORAGE_KEY, currentLang);
+        apply(currentLang);
+        updateTrigger(currentLang);
+      }
+
+      langTrigger.addEventListener('click', function () {
+        var open = langSelect.classList.toggle('open');
+        langTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      langOptions.forEach(function (li) {
+        li.addEventListener('click', function () {
+          setLanguage(li.getAttribute('data-lang'));
+          langSelect.classList.remove('open');
+          langTrigger.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!langSelect.contains(event.target)) {
+          langSelect.classList.remove('open');
+          langTrigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          langSelect.classList.remove('open');
+          langTrigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      apply(currentLang);
+      updateTrigger(currentLang);
     })();
   </script>
 </body>
