@@ -743,6 +743,16 @@
         },
       };
 
+      // "English" covers regions with different clock conventions (en-US is 12h
+      // AM/PM, en-GB/en-AU/en-CA are 24h). Swap the decorative clock-card time to
+      // match the visitor's actual English variant, mirroring the app's behavior.
+      (function () {
+        var sys = navigator.language || 'en-US';
+        if (!sys.toLowerCase().startsWith('en')) return;
+        var uses12h = new Intl.DateTimeFormat(sys, { hour: 'numeric' }).resolvedOptions().hour12 === true;
+        if (!uses12h) LOCALES.en.clockTarget = `tonight · 23:30`;
+      })();
+
       var DEFAULT_LANG = 'en';
       var STORAGE_KEY = 'pd-site-lang';
 
