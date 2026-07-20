@@ -116,6 +116,13 @@ const LOCALES: Record<Lang, UiLocale> = {
   },
 };
 
+// "English" covers several regions with different clock conventions (en-US is
+// 12h AM/PM, en-GB/en-AU/en-CA are 24h). Use the visitor's actual English
+// variant for the tag so the scheduled-time format matches their region,
+// falling back to en-US when the OS isn't reporting an English locale.
+const systemLang = navigator.language || 'en-US';
+LOCALES.en.tag = systemLang.toLowerCase().startsWith('en') ? systemLang : 'en-US';
+
 const DEFAULT_LANG: Lang = 'en';
 
 // First run picks the OS language when it's one we support, otherwise English.
